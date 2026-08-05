@@ -4,7 +4,7 @@ Karya Airel Adrivano, Gathfaan Agra Pratama, dan Aryandana Pascua Patiung dari t
 
 ## Apa produk ini
 
-reindex.ai adalah editor dokumen berbasis AI yang dirancang khusus untuk mahasiswa dan peneliti — bukan tools menulis umum, tapi sesuatu yang dibangun di sekitar kebutuhan spesifik penulisan skripsi, tesis, paper, dan publikasi ilmiah. AI agent-nya hidup langsung di dalam dokumen: dia bisa membaca apa yang sedang dikerjakan, mengedit langsung lewat instruksi, dan membantu riset dengan sitasi yang bisa diverifikasi ke sumber asli.
+Reindex AI adalah editor dokumen berbasis AI yang dirancang khusus untuk mahasiswa dan peneliti — bukan tools menulis umum, tapi sesuatu yang dibangun di sekitar kebutuhan spesifik penulisan skripsi, tesis, paper, dan publikasi ilmiah. AI agent-nya hidup langsung di dalam dokumen: dia bisa membaca apa yang sedang dikerjakan, mengedit langsung lewat instruksi, dan membantu riset dengan sitasi yang bisa diverifikasi ke sumber asli.
 
 Ini aplikasi publik, tapi bukan editor kolaboratif real-time seperti Google Docs yang sebenarnya. Satu dokumen hanya dipegang satu user aktif per device dalam satu waktu (single-writer). Kalau ada yang menyebut "Google Docs clone", maksudnya pengalaman menulisnya yang familiar — rich text, terasa natural — bukan soal multiplayer-nya.
 

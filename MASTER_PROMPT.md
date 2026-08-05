@@ -4,7 +4,7 @@ Karya Airel Adrivano, Gathfaan Agra Pratama, dan Aryandana Pascua Patiung dari t
 
 ## Apa produk ini
 
-Reindex AI adalah editor dokumen berbasis AI yang dirancang khusus untuk mahasiswa dan peneliti — bukan tools menulis umum, tapi sesuatu yang dibangun di sekitar kebutuhan spesifik penulisan skripsi, tesis, paper, dan publikasi ilmiah. AI agent-nya hidup langsung di dalam dokumen: dia bisa membaca apa yang sedang dikerjakan, mengedit langsung lewat instruksi, dan membantu riset dengan sitasi yang bisa diverifikasi ke sumber asli.
+reindex.ai adalah editor dokumen berbasis AI yang dirancang khusus untuk mahasiswa dan peneliti — bukan tools menulis umum, tapi sesuatu yang dibangun di sekitar kebutuhan spesifik penulisan skripsi, tesis, paper, dan publikasi ilmiah. AI agent-nya hidup langsung di dalam dokumen: dia bisa membaca apa yang sedang dikerjakan, mengedit langsung lewat instruksi, dan membantu riset dengan sitasi yang bisa diverifikasi ke sumber asli.
 
 Ini aplikasi publik, tapi bukan editor kolaboratif real-time seperti Google Docs yang sebenarnya. Satu dokumen hanya dipegang satu user aktif per device dalam satu waktu (single-writer). Kalau ada yang menyebut "Google Docs clone", maksudnya pengalaman menulisnya yang familiar — rich text, terasa natural — bukan soal multiplayer-nya.
 
@@ -28,7 +28,7 @@ Akun dan API key (Firebase, Convex, Google AI Studio, Groq, Perplexity) sudah Ka
 
 ### Empat fitur, urutan prioritas
 
-1. **Core editor** — pengalaman menulis rich text yang familiar. Ini fondasi buat semuanya.
+1. **Core editor** — pengalaman menulis rich text yang familiar, sekaligus format-compliant ke standar penulisan akademik (lihat bagian "Format dokumen akademik" di bawah). Ini fondasi buat semuanya.
 2. **Sidebar AI agent** — ini yang paling penting dari sisi diferensiasi produk. Agent membaca dokumen yang sedang kebuka (scope-nya sengaja dibatasi ke satu dokumen, bukan lintas dokumen), bisa langsung mengedit lewat tool-calling, dan punya akses ke tool riset bersitasi.
 3. **Selected-text edit** — user select bagian teks, kasih instruksi, AI eksekusi perubahannya.
 4. **Inline autocomplete** — saran teks yang muncul saat mengetik. Latency-nya harus rendah karena dipanggil sesering keystroke.
@@ -68,6 +68,19 @@ Konten dokumen (TipTap JSON) di-autosave ke Convex secara berkala. Nggak ada Yjs
   - Autocomplete tampil sebagai ghost text inline, `Tab` untuk accept, `Esc` untuk dismiss — pattern yang sama seperti Copilot
 
 Detail visual (warna, spacing, komponen spesifik) pakai default shadcn/ui dan Tailwind. Nggak perlu approval buat tiap keputusan kecil semacam itu.
+
+## Format dokumen akademik
+
+Ini bukan bagian dari rencana awal, tapi masuk akal ditempel ke core editor — argumennya sama: editor yang beneran cocok buat academic writing ya harus format-compliant, bukan cuma soal rich text.
+
+Yang realistis dikerjain sekarang:
+
+- Typography default (font, ukuran, line-spacing, justify) di-set sesuai format kampus lewat konfigurasi styling di TipTap. Ini bukan fitur baru, cuma default styling yang dipilih dengan sengaja.
+- Penomoran heading otomatis (BAB I, BAB II, lalu 1.1, 1.2, 1.1.1) pakai CSS counter di heading TipTap.
+
+Yang sengaja Kami hindari: bikin editor WYSIWYG presisi-halaman kayak Word — margin persis, page break otomatis, nomor halaman yang geser pas konten nambah. Itu namanya pagination engine, dan itu genuinely susah untuk web app, karena browser dari dasarnya nggak punya konsep "halaman" seperti Word atau LaTeX. Kalau dipaksain, itu jadi proyek sendiri yang beratnya bisa ngalahin empat fitur AI di atas.
+
+Jalan tengahnya: editor tetap scroll biasa seperti biasa, tapi presisi margin dan ukuran kertas ditangani pas export — pakai print stylesheet browser (`@page` CSS rule) dan `window.print()` untuk save as PDF. Ini jauh lebih murah daripada bikin generator `.docx` asli, tapi tetap dapat margin dan ukuran kertas yang presisi begitu di-print atau di-PDF-kan.
 
 ## Stack
 
@@ -177,6 +190,7 @@ Beberapa pendekatan sempat dipertimbangkan dan akhirnya nggak dipakai. Kalau nem
 
 Beberapa hal ini masih perlu keputusan atau konfirmasi lebih lanjut, jangan diasumsikan sendiri:
 
+- **Panduan format resmi kampus** — margin, font, ukuran, dan struktur bab yang tepat sebaiknya diambil dari file panduan resmi (template `.docx` atau PDF pedoman skripsi kampus), bukan ditebak dari konvensi umum. Belum ada file ini di tangan, jadi nilai spesifik (margin dalam cm, font size persis) belum bisa dipastikan — pakai placeholder yang wajar dulu (margin 4-3-3-3 cm, Times New Roman 12pt, spasi 1.5, yang umum dipakai kampus Indonesia) sampai file aslinya ada.
 - **Isi fitur kelima ("others")** — di luar scope build ini, belum ada spec-nya.
 - **Detail visual/branding** (logo, warna brand) di luar default shadcn/ui — kalau belum dikasih, pakai default neutral, jangan nebak identitas visual.
 - **Tailwind v3 vs v4** — defaultnya v4 (stable saat ini, config CSS-first), tapi cek dulu apakah shadcn/ui yang dipakai sudah kompatibel v4 sebelum commit ke situ.

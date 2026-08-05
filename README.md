@@ -2,6 +2,8 @@
 
 # Reindex AI
 
+by 2030 SUKSES!
+
 **AI-native document editor for academic writing.**
 Research, cite, and write — without leaving the page.
 

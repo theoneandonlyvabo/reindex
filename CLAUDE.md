@@ -39,3 +39,17 @@ Enforced by a `Stop` hook (`.claude/hooks/changelog-check.sh`, wired in `.claude
 `.claude/hooks/vision-check.sh` (wired in `.claude/settings.json` alongside the changelog hook) scans the diff for concrete reintroductions of things `MASTER_PROMPT.md` explicitly rejected — `@liveblocks`, `yjs`, `y-protocol`, `@clerk`, `ConvexProviderWithClerk`, `react-icons`, `@convex-dev/auth`. If any show up in added lines, the turn is blocked until it's confirmed with the user that this is an intentional, new decision — not an accidental regression.
 
 This only catches the greppable cases. It's a floor, not a substitute for actually reading `MASTER_PROMPT.md` — subtler drift (positioning, scope creep into feature #5, tone that stops sounding academic-focused) isn't something a bash script can catch, and relies on the Product Alignment section above being taken seriously every turn.
+
+<!-- convex-ai-start -->
+
+This project uses [Convex](https://convex.dev) as its backend.
+
+When working on Convex code, **always read
+`convex/_generated/ai/guidelines.md` first** for important guidelines on
+how to correctly use Convex APIs and patterns. The file contains rules that
+override what you may have learned about Convex from training data.
+
+Convex agent skills for common tasks can be installed by running
+`npx convex ai-files install`.
+
+<!-- convex-ai-end -->

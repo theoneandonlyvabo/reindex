@@ -52,7 +52,23 @@
 
 .academic-doc p {
   margin: 0 0 1em 0;
-  text-indent: 1.25cm;
+}
+
+/*
+ * On-screen "paper" surface: same A4 width and margin values as the print
+ * @page rule below, so what you see while editing matches what prints.
+ * Not a pagination engine — a single sheet that grows with content, no
+ * page breaks/running headers, per MASTER_PROMPT.md.
+ */
+.doc-paper {
+  width: 21cm;
+  max-width: 100%;
+  min-height: 29.7cm;
+  padding: 3cm 3cm 3cm 4cm;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
 @media print {
@@ -65,7 +81,18 @@
     margin: 3cm 3cm 3cm 4cm;
   }
 
-  .academic-doc {
-    text-indent: 0;
+  .doc-paper {
+    width: auto;
+    min-height: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .doc-canvas {
+    background: none;
+    padding: 0;
+    overflow: visible;
   }
 }

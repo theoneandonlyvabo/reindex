@@ -62,10 +62,10 @@ export function DocumentEditor({ doc }: { doc: Doc<"documents"> }) {
         />
       </div>
       <Toolbar editor={editor} documentId={doc._id} />
-      <div className="flex-1 overflow-y-auto px-6 py-8">
+      <div className="doc-canvas flex-1 overflow-auto bg-muted px-6 py-8">
         <EditorContent
           editor={editor}
-          className="academic-doc mx-auto max-w-3xl"
+          className="academic-doc doc-paper mx-auto"
         />
       </div>
     </div>

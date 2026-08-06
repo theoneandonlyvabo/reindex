@@ -1,13 +1,19 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireDocument, requireUser } from "./model/auth";
+import {
+  getAuthenticatedUser,
+  getOwnedDocument,
+  requireDocument,
+  requireUser,
+} from "./model/auth";
 
 const EMPTY_DOC = { type: "doc", content: [{ type: "paragraph" }] };
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const user = await requireUser(ctx);
+    const user = await getAuthenticatedUser(ctx);
+    if (!user) return [];
     return await ctx.db
       .query("documents")
       .withIndex("by_owner", (q) => q.eq("ownerId", user._id))
@@ -19,7 +25,7 @@ export const list = query({
 export const get = query({
   args: { documentId: v.id("documents") },
   handler: async (ctx, args) => {
-    return await requireDocument(ctx, args.documentId);
+    return await getOwnedDocument(ctx, args.documentId);
   },
 });
 

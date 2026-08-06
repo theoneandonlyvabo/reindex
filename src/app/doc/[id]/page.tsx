@@ -24,6 +24,14 @@ function DocumentPageContent() {
     );
   }
 
+  if (doc === null) {
+    return (
+      <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+        Dokumen tidak ditemukan atau Anda tidak memiliki akses.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-1 overflow-hidden">
       <div className="min-w-0 flex-1 lg:basis-[70%]">

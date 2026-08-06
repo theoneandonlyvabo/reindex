@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireDocument, requireUser } from "./model/auth";
+import { getOwnedDocument, requireDocument, requireUser } from "./model/auth";
 
 /** Client calls this to get a short-lived URL it can POST the file to directly. */
 export const generateUploadUrl = mutation({
@@ -27,7 +27,8 @@ export const attach = mutation({
 export const listForDocument = query({
   args: { documentId: v.id("documents") },
   handler: async (ctx, args) => {
-    await requireDocument(ctx, args.documentId);
+    const doc = await getOwnedDocument(ctx, args.documentId);
+    if (!doc) return [];
     const files = await ctx.db
       .query("documentFiles")
       .withIndex("by_document", (q) => q.eq("documentId", args.documentId))

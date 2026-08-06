@@ -17,6 +17,24 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 00:36
+> "oke clear, gw mau half-way sane check dulu untuk QC phase ini. gw gatau ini udh kesentuh apa blm tapi ada bbrp bug : (1) paper (page) ga keliatan di layar, nyatu sama background. (2) gw gatau current indentasi yg keselect untuk suatu body text yg mana, jd cm kek applier (harusnya kita jg tau si text indent kemana. (3) page margin masih ngasal, gada boundary kanan kiri / atas bawah, seperti masalah 1. toolbar masih kurang lengkap (liat gambar ini, ini toolbar Google Docs, harusnya bare minimum itu segini. [Image #3]). KALAU (KALAU) dari QC gw skrg ini sebenernya emg blm keimplement abaikan aja, else taro ini jadi masukan untuk next phases (masukin issue yg gw state ke phase accoridingly)."
+
+- **Fix:** `src/styles/academic.css` — added `.doc-paper`/`.doc-canvas` classes: paper now renders as a white/card A4-width sheet with the same 3-3-3-4cm margins as the print `@page` rule, on a `bg-muted` canvas so it's no longer flush with the app background (issues 1 and 3)
+- **Fix:** `src/components/editor/document-editor.tsx` — wired the new classes; removed print-only `padding`/`background`/`shadow` reset so the on-screen paper margins don't stack on top of `@page`'s print margins
+- **Fix:** `src/styles/academic.css` — removed the blanket unrequested `text-indent: 1.25cm` on every paragraph (was silent/uncontrollable, contributing to issue 2's confusion); no auto-indent until real indent controls exist
+- **Adjust:** Backlogged, not fixed this turn (never in Phase 1's scoped toolbar — headings/bold/italic/underline/lists/align/link/image only): adjustable per-paragraph indent controls with visible current-state feedback (issue 2), and full toolbar parity with Google Docs baseline (font family/size, paragraph-style dropdown, text/highlight color, line-spacing, checklist, indent buttons, clear-formatting, overflow menu)
+
+---
+
+### 00:24
+> "Got in, typed, reloaded, crashed : ## Error Type\nRuntime Error\n\n## Error Message\n[CONVEX Q(documents:get)] [Request ID: 2b2fb51a16e5d535] Server Error\nUncaught Error: User not found — call ensureUser first\n    at requireUser (../../convex/model/auth.ts:27:9)\n    at async requireDocument (../../convex/model/auth.ts:41:7)\n    at async handler (../convex/documents.ts:25:31)\n\n  Called by client\n\n\n    at requireUser (../../convex/model/auth.ts:27:9)\n    at async requireDocument (../../convex/model/auth.ts:41:7)\n    at async handler (../convex/documents.ts:25:31)\n    [stack trace truncated — full trace was Next.js/Convex/React internals from the browser error overlay]\n\nNext.js version: 16.2.12 (Turbopack)"
+
+- **Fix:** `convex/model/auth.ts` — page reload crashed with "User not found" because `documents.get` (a query) threw when the `ensureUser` mutation (fired async from a client effect) hadn't landed yet. Split `requireUser`/`requireDocument` (throwing, for mutations) from new non-throwing `getAuthenticatedUser`/`getOwnedDocument` (for queries) so a missing user row degrades to `null` instead of an uncaught error — Convex reactively reruns the query once `ensureUser` commits, since it reads the same index
+- **Adjust:** `convex/documents.ts` `list`/`get`, `convex/documentFiles.ts` `listForDocument` — switched to the non-throwing helpers; `app/doc/[id]/page.tsx` — handle `doc === null` distinctly from `doc === undefined` (loading)
+
+---
+
 ### 00:01
 > "go!"
 

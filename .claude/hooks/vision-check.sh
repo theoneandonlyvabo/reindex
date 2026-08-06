@@ -36,7 +36,7 @@ if [ -n "$FOUND" ]; then
   echo "BLOCKED — perubahan ini nyentuh sesuatu yang eksplisit udah ditolak di MASTER_PROMPT.md ('Keputusan yang sudah diambil'):${FOUND}"
   echo ""
   echo "Kalau ini beneran keputusan baru (bukan kecelakaan/reintroduce lama), konfirmasi eksplisit ke user dulu sebelum lanjut — jangan diam-diam jalan terus."
-  exit 1
+  exit 2
 fi
 
 exit 0

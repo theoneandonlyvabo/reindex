@@ -15,6 +15,23 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 ---
 -->
 
+## 2026-08-07
+
+### 00:01
+> "go!"
+
+- **New:** `convex/schema.ts` (25L), `auth.config.ts` (8L), `convex.config.ts` (7L, mounts `@convex-dev/rate-limiter`), `model/auth.ts` (46L, `requireUser`/`requireDocument` — the single ownership-check chokepoint), `users.ts` (34L, `ensureUser` upsert), `documents.ts` (77L, CRUD), `documentFiles.ts` (42L, upload/attach)
+- **New:** `src/lib/firebase.ts` (18L), `hooks/use-firebase-auth.ts` (37L), `hooks/use-debounced-callback.ts` (28L), `components/providers/{convex-client-provider,auth-bootstrap}.tsx` (20L/22L), `components/auth/require-auth.tsx` (26L)
+- **New:** `app/sign-in/page.tsx` (143L, Google + email/password), `app/dashboard/page.tsx` (107L), `app/doc/[id]/page.tsx` (69L, editor 70% + sidebar shell 30%), `components/editor/{document-editor,toolbar}.tsx` (73L/243L), `styles/academic.css` (71L, TNR 12pt/1.5/justify + BAB counters + `@page` print)
+- **New:** `.env.example` (29L, var names only)
+- **Adjust:** `package.json` — `next`/`eslint-config-next` downgraded and pinned exact to `16.2.12` (MASTER_PROMPT forbids 16.3.0); added tiptap 2.27.2, `ai`@7 + `@ai-sdk/{google,groq,perplexity,react}`@4, `@convex-dev/rate-limiter`, shadcn/ui (Radix base, not the new Base UI default), zustand, next-themes, lucide-react
+- **Adjust:** `app/layout.tsx` metadata + academic.css import; `app/page.tsx` replaced default scaffold; `app/globals.css` fixed circular `--font-sans` var shadcn's init left broken
+- **Adjust:** `.claude/settings.json` — wired `vision-check.sh` as a second Stop hook (was written but never registered); `vision-check.sh` — its own `exit 1` fixed to `exit 2` (only 2 blocks a turn, so the hook was a no-op)
+- **Fix:** disk was at 100% (132MiB free), blocking all npm installs — cleared 6.7GB `~/.npm` cache (user-approved)
+- **Fix:** removed stray `@base-ui/react` dep left by an aborted shadcn init attempt before the disk-space fix
+
+---
+
 ## 2026-08-05
 
 ### 01:06

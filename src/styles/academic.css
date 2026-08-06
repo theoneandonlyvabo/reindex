@@ -1,0 +1,71 @@
+/*
+ * Placeholder Indonesian-campus defaults per MASTER_PROMPT.md: margin
+ * 4-3-3-3 cm, Times New Roman 12pt, spasi 1.5, justify. Swap these values
+ * once the real campus format guideline is available — everything lives in
+ * this one file so that's a single edit.
+ */
+
+.academic-doc {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  text-align: justify;
+  counter-reset: academic-chapter;
+}
+
+.academic-doc h1 {
+  counter-increment: academic-chapter;
+  counter-reset: academic-section;
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 2em;
+}
+
+.academic-doc h1::before {
+  content: "BAB " counter(academic-chapter, upper-roman);
+  display: block;
+}
+
+.academic-doc h2 {
+  counter-increment: academic-section;
+  counter-reset: academic-subsection;
+  font-size: 12pt;
+  font-weight: bold;
+}
+
+.academic-doc h2::before {
+  content: counter(academic-chapter) "." counter(academic-section) "  ";
+}
+
+.academic-doc h3 {
+  counter-increment: academic-subsection;
+  font-size: 12pt;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.academic-doc h3::before {
+  content: counter(academic-chapter) "." counter(academic-section) "."
+    counter(academic-subsection) "  ";
+}
+
+.academic-doc p {
+  margin: 0 0 1em 0;
+  text-indent: 1.25cm;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 3cm 3cm 3cm 4cm;
+  }
+
+  .academic-doc {
+    text-indent: 0;
+  }
+}

@@ -57,12 +57,12 @@ export function DocumentEditor({ doc }: { doc: Doc<"documents"> }) {
             setTitle(e.target.value);
             scheduleTitleSave(e.target.value);
           }}
-          className="border-none px-0 text-lg font-medium shadow-none focus-visible:ring-0"
+          className="w-fit min-w-48 border border-transparent px-2 text-2xl font-medium shadow-none hover:border-input focus-visible:border-input focus-visible:ring-0"
           placeholder="Judul draf"
         />
       </div>
       <Toolbar editor={editor} documentId={doc._id} />
-      <div className="doc-canvas flex-1 overflow-auto bg-muted px-6 py-8">
+      <div className="doc-canvas min-h-0 flex-1 overflow-auto bg-muted px-6 py-8">
         <EditorContent
           editor={editor}
           className="academic-doc doc-paper mx-auto"

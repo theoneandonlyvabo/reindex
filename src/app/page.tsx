@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 overflow-y-auto px-6 text-center">
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Reindex AI</h1>
         <p className="max-w-md text-muted-foreground">

@@ -66,7 +66,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center px-6 py-12">
+    <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-6 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Masuk ke Reindex AI</CardTitle>

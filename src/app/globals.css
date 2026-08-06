@@ -127,4 +127,16 @@
   html {
     @apply font-sans;
   }
+
+  /* Tailwind's preflight resets buttons to `cursor: default`; restore the
+   * hand cursor on every interactive control so hover state reads as
+   * clickable. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  select,
+  summary {
+    cursor: pointer;
+  }
 }

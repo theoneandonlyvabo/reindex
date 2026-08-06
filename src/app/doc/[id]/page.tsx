@@ -33,15 +33,15 @@ function DocumentPageContent() {
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex min-h-0 flex-1 overflow-hidden">
       <div className="min-w-0 flex-1 lg:basis-[70%]">
         <DocumentEditor key={doc._id} doc={doc} />
       </div>
 
       {sidebarOpen ? (
-        <aside className="no-print hidden w-full flex-col border-l lg:flex lg:basis-[30%]">
+        <aside className="no-print hidden w-full flex-col overflow-hidden border-l lg:flex lg:basis-[30%]">
           <div className="flex items-center justify-between border-b px-4 py-2">
-            <span className="text-sm font-medium">Asisten AI</span>
+            <span className="text-sm font-medium">Reindex Agent</span>
             <Button
               variant="ghost"
               size="icon-sm"

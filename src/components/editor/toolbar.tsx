@@ -25,6 +25,22 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type BlockType = "paragraph" | "1" | "2" | "3";
+
+function getCurrentBlockType(editor: Editor): BlockType {
+  if (editor.isActive("heading", { level: 1 })) return "1";
+  if (editor.isActive("heading", { level: 2 })) return "2";
+  if (editor.isActive("heading", { level: 3 })) return "3";
+  return "paragraph";
+}
 
 export function Toolbar({
   editor,
@@ -39,11 +55,15 @@ export function Toolbar({
 
   if (!editor) return null;
 
-  function setHeading(level: 1 | 2 | 3 | 0) {
-    if (level === 0) {
+  function setBlockType(value: BlockType) {
+    if (value === "paragraph") {
       editor!.chain().focus().setParagraph().run();
     } else {
-      editor!.chain().focus().toggleHeading({ level }).run();
+      editor!
+        .chain()
+        .focus()
+        .setHeading({ level: Number(value) as 1 | 2 | 3 })
+        .run();
     }
   }
 
@@ -76,27 +96,17 @@ export function Toolbar({
 
   return (
     <div className="no-print flex flex-wrap items-center gap-1 border-b bg-background px-3 py-2">
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("heading", { level: 1 })}
-        onPressedChange={() => setHeading(1)}
-      >
-        H1
-      </Toggle>
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("heading", { level: 2 })}
-        onPressedChange={() => setHeading(2)}
-      >
-        H2
-      </Toggle>
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("heading", { level: 3 })}
-        onPressedChange={() => setHeading(3)}
-      >
-        H3
-      </Toggle>
+      <Select value={getCurrentBlockType(editor)} onValueChange={setBlockType}>
+        <SelectTrigger size="sm" className="w-32">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="paragraph">Normal text</SelectItem>
+          <SelectItem value="1">Heading 1</SelectItem>
+          <SelectItem value="2">Heading 2</SelectItem>
+          <SelectItem value="3">Heading 3</SelectItem>
+        </SelectContent>
+      </Select>
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 

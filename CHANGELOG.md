@@ -17,6 +17,21 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 00:53
+> "QC lagi, (1) sidebar agent harusnya GAK BISA DISCROLL (currently msh bs discroll), (2) Cursor in page HARUSNYA GAK BERADA DALEM BOX (liat gambar [Image #4], harusnya kyk [Image #5] *lgsg cursor, bukan ada box boundary nya dulu*), (3) UI wise, bikin lebih modern-tech vibe (cursor, antigravity, claude, paham kan?) bikinin design instruction file under .design/ui/(bikin .md file baru disini, isinya jelasin arah visual design ui yg gw mau). (4) H1, H2, H3 button harusnya dropdown, dan ada state 'Normal Text'. (5) ketika scorlling, yang bergerak HANYA PAPER PAGE NYA, tidak yang lain (ngaruh ke poin pertama, top toolbar jg seharusnya gak scrollable). (6) 'Asisten AI' ubah jadi Reindex Agent. (7) Judul dokumen dibuat lebih besar, dan hover state nya buatin border untuk contain si judul ini. (8) ubah semua interactable / hoverable component munculin cursor jari."
+
+- **Fix:** `app/layout.tsx` — `body` changed `min-h-full` (a floor, content could still grow past viewport) → `h-full overflow-hidden` (a hard cap), which was the actual root cause of the whole page scrolling together instead of just the paper (issues 1, 5)
+- **Fix:** `app/doc/[id]/page.tsx`, `components/editor/document-editor.tsx` (`.doc-canvas`) — added `min-h-0` at each column-direction flex boundary so `overflow-auto`/`overflow-hidden` actually clip instead of the flexbox min-height:auto bug forcing content-sized growth; toolbar/title bar are structural siblings of the scroll region, so they were already correctly non-scrolling once this was fixed
+- **Fix:** `app/page.tsx`, `sign-in/page.tsx`, `dashboard/page.tsx` — since body no longer scrolls globally, each top-level page now owns its own `overflow-y-auto min-h-0` region (dashboard's document list would otherwise get silently clipped instead of scrolling)
+- **Fix:** `src/styles/academic.css` — added `.ProseMirror { outline: none }`; the browser's default contenteditable focus outline was hugging the empty first line, rendering as a small floating box instead of a plain cursor
+- **New:** `.design/ui/design-direction.md` — modern-tech chrome direction (Cursor/Antigravity/Claude reference), explicitly scoped to the app chrome only — the academic paper itself stays out of scope by design
+- **Adjust:** `components/editor/toolbar.tsx` — H1/H2/H3 toggle buttons replaced with one shadcn `Select` (`components/ui/select.tsx` added) showing current block state including "Normal text"
+- **Adjust:** `app/doc/[id]/page.tsx` — "Asisten AI" → "Reindex Agent"
+- **Adjust:** `components/editor/document-editor.tsx` — title input enlarged (`text-lg` → `text-2xl`) with a border that appears on hover/focus instead of no boundary at all
+- **Adjust:** `app/globals.css` — restored `cursor: pointer` on buttons/links/labels/select (Tailwind's preflight resets buttons to `cursor: default`)
+
+---
+
 ### 00:36
 > "oke clear, gw mau half-way sane check dulu untuk QC phase ini. gw gatau ini udh kesentuh apa blm tapi ada bbrp bug : (1) paper (page) ga keliatan di layar, nyatu sama background. (2) gw gatau current indentasi yg keselect untuk suatu body text yg mana, jd cm kek applier (harusnya kita jg tau si text indent kemana. (3) page margin masih ngasal, gada boundary kanan kiri / atas bawah, seperti masalah 1. toolbar masih kurang lengkap (liat gambar ini, ini toolbar Google Docs, harusnya bare minimum itu segini. [Image #3]). KALAU (KALAU) dari QC gw skrg ini sebenernya emg blm keimplement abaikan aja, else taro ini jadi masukan untuk next phases (masukin issue yg gw state ke phase accoridingly)."
 

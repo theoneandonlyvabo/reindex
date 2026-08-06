@@ -54,6 +54,12 @@
   margin: 0 0 1em 0;
 }
 
+/* TipTap's contenteditable root gets a browser default focus outline that
+ * hugs tightly around an empty first line, rendering as a stray box. */
+.ProseMirror {
+  outline: none;
+}
+
 /*
  * On-screen "paper" surface: same A4 width and margin values as the print
  * @page rule below, so what you see while editing matches what prints.

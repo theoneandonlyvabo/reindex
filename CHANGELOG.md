@@ -17,6 +17,16 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 13:42
+> "lets QC. (1) Margin on paper masih acak2an bgt, default should be 1 inch from edge (vertically and horizontally), paper should be real paper size (A4, Letter, etc). (2) [Image #8] thought processs should not be directly visible, diminimze dulu aja by default dan user harus tau kalo ai lagi mikir, either tambah animasi laoading or something (saran: breathing animation di "Reindex Agnet is thinking". (3) Add more icons to each components, skrg msh plain bgt apalagi di AI sidebar. (4) Noticable bug: prompt pertama berhasil dan menulis ke kertas, prompt kedua jg masih bs dijawab, ketika masuk ke prompt ketiga udh ngaco dan ga ada output sama sekali."
+
+- **Fix:** `src/styles/academic.css` — paper margin was the asymmetric 3-3-3-4cm skripsi-binding convention from the original placeholder guess; user wants uniform, changed `.doc-paper` padding and `@page` margin to `2.54cm` (1in) on all sides, screen and print both
+- **Fix (root cause, item 4):** server logs showed `AI_RetryError: Failed after 3 attempts... This model is currently experiencing high demand` on later turns of a conversation — but the sidebar had no rendering at all for `status === "error"`, so a failed request just showed nothing. Added an error state with the actual message and a "Coba lagi" retry button (`regenerate()`); bumped `maxDuration` 30→60 since legitimate multi-step responses were already taking 10-15s before any retries
+- **Adjust:** `src/components/editor/ai-sidebar.tsx` — `search_web` results now collapse behind a `<details>`/`<summary>` disclosure by default (was a full research dump inline); "Reindex Agent sedang berpikir..." now only shows before the assistant's first visible content (not for the whole request lifetime) and uses `animate-pulse` instead of static text
+- **Adjust:** `src/components/editor/ai-sidebar.tsx` — added icons throughout: role icons (user/agent) per message, tool-specific icons per edit chip (insert/replace/format), search icon on the research disclosure
+
+---
+
 ### 13:24
 > "[Image #6] not working at all, debug first and report to me"
 

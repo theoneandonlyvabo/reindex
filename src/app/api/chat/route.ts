@@ -12,7 +12,9 @@ import { z } from "zod";
 import { checkRateLimit } from "@/lib/ai/rate-limit";
 import { agentSystemPrompt } from "@/lib/ai/prompts";
 
-export const maxDuration = 30;
+// Multi-step tool loops + retries against a model that's shown transient
+// "high demand" errors can legitimately take 10-15s per step.
+export const maxDuration = 60;
 
 type ChatRequestBody = {
   messages: UIMessage[];

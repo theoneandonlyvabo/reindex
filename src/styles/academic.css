@@ -1,8 +1,8 @@
 /*
- * Placeholder Indonesian-campus defaults per MASTER_PROMPT.md: margin
- * 4-3-3-3 cm, Times New Roman 12pt, spasi 1.5, justify. Swap these values
- * once the real campus format guideline is available — everything lives in
- * this one file so that's a single edit.
+ * Placeholder defaults per MASTER_PROMPT.md until the real campus format
+ * guideline is available: A4, uniform 1in (2.54cm) margins on all sides,
+ * Times New Roman 12pt, spasi 1.5, justify. Everything lives in this one
+ * file so swapping values later is a single edit.
  */
 
 .academic-doc {
@@ -70,7 +70,7 @@
   width: 21cm;
   max-width: 100%;
   min-height: 29.7cm;
-  padding: 3cm 3cm 3cm 4cm;
+  padding: 2.54cm;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 2px;
@@ -84,7 +84,7 @@
 
   @page {
     size: A4;
-    margin: 3cm 3cm 3cm 4cm;
+    margin: 2.54cm;
   }
 
   .doc-paper {

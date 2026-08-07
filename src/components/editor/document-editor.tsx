@@ -11,20 +11,17 @@ import { SelectionToolbar } from "./selection-toolbar";
 import { DocumentOutline } from "./document-outline";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PAGE_GAP_PX, PAGE_HEIGHT_PX } from "@/lib/editor/pagination-geometry";
 
 export function DocumentEditor({
   editor,
   title,
   onTitleChange,
   documentId,
-  pageCount,
 }: {
   editor: Editor | null;
   title: string;
   onTitleChange: (next: string) => void;
   documentId: Id<"documents">;
-  pageCount: number;
 }) {
   const [zoom, setZoom] = useState(100);
   const [outlineOpen, setOutlineOpen] = useState(true);
@@ -91,19 +88,10 @@ export function DocumentEditor({
            * didn't scale with it. Zooming the canvas scales both together. */}
           <SelectionToolbar editor={editor} />
           <div className="doc-page-frame mx-auto">
-            {/* Simulated page sheets, one per page the pagination
-             * extension computed — see academic.css and
-             * extensions/pagination.ts for how this works together. */}
-            {Array.from({ length: pageCount }).map((_, i) => (
-              <div
-                key={i}
-                className="doc-page-bg"
-                style={{
-                  top: i * (PAGE_HEIGHT_PX + PAGE_GAP_PX),
-                  height: PAGE_HEIGHT_PX,
-                }}
-              />
-            ))}
+            {/* Simulated page sheets render via the pagination extension's
+             * own decorations (one atomic dispatch alongside the spacer
+             * widgets that push content down) — not separate React state,
+             * see extensions/pagination.ts. */}
             <EditorContent editor={editor} className="academic-doc doc-paper" />
           </div>
         </div>

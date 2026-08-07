@@ -46,8 +46,6 @@ export function useDocumentEditor(doc: Doc<"documents">) {
   const [autocompleteEnabled, setAutocompleteEnabledState] = useState(true);
   const autocompleteEnabledRef = useRef(true);
 
-  const [pageCount, setPageCount] = useState(1);
-
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -62,7 +60,7 @@ export function useDocumentEditor(doc: Doc<"documents">) {
       FlashHighlight,
       PendingSelection,
       Autocomplete,
-      Pagination.configure({ onPageCountChange: setPageCount }),
+      Pagination,
     ],
     content: doc.content,
     onUpdate: ({ editor, transaction }) => {
@@ -90,6 +88,5 @@ export function useDocumentEditor(doc: Doc<"documents">) {
     setTitle,
     autocompleteEnabled,
     setAutocompleteEnabled,
-    pageCount,
   };
 }

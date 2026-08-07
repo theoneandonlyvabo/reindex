@@ -4,6 +4,46 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-08
 
+### 02:00
+> "[Image #17] IT WORKED. is there a phase 5?"
+
+User-confirmed working: live pagination (`src/components/editor/extensions/pagination.ts`) now correctly renders a new full-width page sheet with proper margins when content overflows the current page. Closes out the four-round bug hunt from the entries above (z-index stacking context → posAtDOM ambiguity → React/ProseMirror state desync → positioning-context escape). No code changes this entry — verification only.
+
+---
+
+### 01:50
+> "[Image #15] [Image #16] tetep ga work, malah tambah buggy, page size ngaco, margin ilang, page break (new page) tetep gaada. fix."
+
+Fourth bug in this feature, and this one was introduced BY the previous fix (moving the page-background rectangles into a decoration widget):
+
+- **Fix (root cause):** `ProseMirror`'s own base CSS sets `.ProseMirror { position: relative }` (confirmed in `node_modules/prosemirror-view/style/prosemirror.css`). The background-layer widget added last round renders AS A CHILD of `.ProseMirror`, so that made `.ProseMirror` — not `.doc-page-frame` — the nearest positioned ancestor for its `inset: 0`, which resolved it against `.ProseMirror`'s narrow content box (inside `.doc-paper`'s 2.54cm padding), not the full page. That's exactly "page narrower, margins gone": the white sheet was sized to the text column, not the actual A4 width. Fixed in `src/components/editor/extensions/pagination.ts` by explicitly offsetting the widget with `top`/`left: -PAGE_MARGIN_PX` and an explicit `width: PAGE_WIDTH_PX` (all inline styles, raw px, same pattern as everything else here) to escape `.ProseMirror`'s bounds and land flush with `.doc-page-frame`'s actual edges. Removed the now-conflicting `.doc-page-bg-layer` CSS rule in `academic.css` (its `inset: 0` set `right`/`bottom: 0`, which would have fought the new inline `top`/`left`/`width` — over-constrained box)
+- Verified: `tsc`, `eslint`, `next build` all clean
+
+---
+
+### 01:35
+> "[Image #14] nggak, gak work page baru nya ttp ga kerender. liat noh floating text."
+
+Third bug in this feature within the same day — root-caused it as architectural, not another isolated off-by-one:
+
+- **Fix (structural root cause):** `pageCount` lived in React state, updated via a callback from a `requestAnimationFrame`-deferred DOM measurement pass, while the actual spacer decorations lived separately in ProseMirror plugin state, updated via a transaction dispatch. Two representations of "how many pages" going through two different, independently-timed update paths — exactly the shape of bug that produces "the spacer pushed content down correctly, but no matching background sheet rendered to show it landed on a new page." Consolidated: `src/components/editor/extensions/pagination.ts` now renders the background page rectangles AS decorations too (a single widget at position 0 containing all page sheets), computed in the *same* pass and dispatched in the *same* transaction as the spacer widgets — one atomic update, nothing to fall out of sync. Removed `onPageCountChange`/`pageCount` entirely from `use-document-editor.ts` → `document-workspace.tsx` → `document-editor.tsx` (no longer needed) and gave each widget decoration an explicit `key` so ProseMirror's own diffing reuses unchanged DOM nodes across recomputes instead of the manual signature-comparison this replaced
+- `academic.css` — `.doc-page-bg` sheets now nest inside a new `.doc-page-bg-layer` wrapper (the decoration's root element) instead of being direct children of `.doc-page-frame`; `isolation: isolate` stays on `.doc-page-frame` for the same z-index-containment reason as the previous fix
+- Verified: `tsc`, `eslint`, `next build` all clean
+
+---
+
+### 01:10
+> "[Image #13] why the fuck is the paper gone?, also jangan pernah deactivate text cursor di area dokumen, keep it as is last position" + "[Image #14] another bug, kalo misal break line udh ngereach suatu page's margin, DRAW PAGE BARU (LITERALLY DI DRAW PAPERNYA)." + confirmed via AskUserQuestion: content was genuinely long enough for 2+ pages, so the blank page was a real bug, not normal below-content whitespace
+
+Two real bugs found in yesterday's pagination work — flagged at the time as unverified without a browser, and this is exactly why:
+
+- **Fix (root cause 1, paper disappeared entirely):** `academic.css` — `.doc-page-bg`'s `z-index: -1` had no stacking context of its own to be contained by, so it didn't just sink behind its `EditorContent` sibling — it dropped below `.doc-canvas`'s background too, rendering fully hidden behind the muted canvas. Added `isolation: isolate` to `.doc-page-frame` (the purpose-built CSS property for exactly this, not a z-index-juggling workaround)
+- **Fix (root cause 2, blank page with content missing):** `src/components/editor/extensions/pagination.ts` — `view.posAtDOM(el, 0)` is ambiguous about whether it returns the position *before* a block node or *inside* it at its first character. Getting that wrong placed the spacer widget INSIDE a paragraph's DOM rather than as a sibling of it — breaking the "direct children of `.ProseMirror`" assumption every later measurement pass relied on, without ever throwing an error to reveal it. Replaced with `view.state.doc.forEach(...)`'s offset, which has no such ambiguity — it's the document model directly stating "the absolute position right before this top-level node." Also switched the effective-zoom measurement from `.ProseMirror`'s content width (required padding/box-sizing assumptions to hold exactly) to `.doc-page-frame`'s width (plainly `21cm`, nothing to get subtly wrong), and clamped the spacer height's `remaining` term to never go negative
+- Checked for an explicit cursor-deactivation cause per "jangan pernah deactivate text cursor": the pagination extension has zero `.focus()`/`.blur()`/selection-manipulating calls — its only side effect is a metadata-only transaction dispatch (no `docChanged`, no explicit selection change), which ProseMirror should already preserve selection through unchanged. Couldn't pin down a concrete mechanism causing cursor loss from static reading alone; flagging that this specific sub-issue is unconfirmed, not silently claiming it's fixed
+- Verified: `tsc`, `eslint`, `next build` all clean. **Still recommend explicitly re-testing the multi-page scenario** — two real, distinct bugs surfaced in this one feature within a day of shipping it without visual verification, so treat it as the highest-risk part of the build until you've confirmed it directly
+
+---
+
 ### 00:35
 > "known bug: page zoom size zooms the TEXTS not the PAGE, how it should be is it zooms the whole page not only the texts." + "known bug: kalo kita enter sampe ujung bawah page bukannya bikin page baru dia malah extend current page, seharusnya break ke page baru." (confirmed via AskUserQuestion: build live pagination, despite this being explicitly out of scope in MASTER_PROMPT.md)
 

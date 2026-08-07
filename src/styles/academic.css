@@ -81,9 +81,11 @@
  * .doc-paper is the CONTENT-FLOW column, still one continuous ProseMirror
  * doc — real per-page editable regions would break cursor/selection/undo
  * continuity. The pagination extension inserts spacer widgets that push
- * content down at each computed page boundary; .doc-page-bg renders the
- * separate white A4 sheets BEHIND that flow (one per computed page, inside
- * .doc-page-frame), so it visually reads as separate pages.
+ * content down at each computed page boundary, AND the background page
+ * rectangles — both as decorations from the same measurement pass, kept
+ * in one atomic dispatch rather than syncing through separate React state.
+ * .doc-page-bg-layer (a decoration widget) renders the separate white A4
+ * sheets BEHIND the text flow, one per computed page.
  */
 .doc-paper {
   width: 100%;
@@ -95,12 +97,25 @@
   position: relative;
   width: 21cm;
   max-width: 100%;
+  /* Without this, .doc-page-bg-layer's z-index: -1 doesn't just sink
+   * behind its EditorContent sibling — with no stacking context of its
+   * own to be contained by, it drops below .doc-canvas's background too,
+   * rendering completely hidden behind the muted canvas. isolation:
+   * isolate scopes the negative z-index to inside this element. */
+  isolation: isolate;
 }
 
+/* Positioning (position/top/left/width/z-index) is set inline by the
+ * pagination extension itself, in raw px, not here — .ProseMirror has
+ * `position: relative` from ProseMirror's own base CSS, making IT (not
+ * .doc-page-frame) the nearest positioned ancestor for this widget, so it
+ * has to escape .doc-paper's padding with a negative offset computed
+ * against the exact same PAGE_MARGIN_PX constant. A CSS `inset: 0` rule
+ * here would set right/bottom: 0 and conflict with those inline
+ * top/left/width values (over-constrained box). */
 .doc-page-bg {
   position: absolute;
   inset-inline: 0;
-  z-index: -1;
   /* Pure neutral, deliberately NOT var(--card) — the paper is exempt from
    * the app's warm theme regardless of light/dark mode. */
   background: oklch(1 0 0);
@@ -122,7 +137,7 @@
   /* Real print pagination is the browser's own @page handling — the
    * on-screen simulated-pages layer above is irrelevant here and must not
    * double up with it. */
-  .doc-page-bg,
+  .doc-page-bg-layer,
   .page-break-spacer {
     display: none !important;
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import type { Editor } from "@tiptap/react";
+import { useEditorState, type Editor } from "@tiptap/react";
 import { useMutation } from "convex/react";
 import {
   AlignCenter,
@@ -35,6 +35,8 @@ import {
 
 type BlockType = "paragraph" | "1" | "2" | "3";
 
+const ZOOM_LEVELS = [50, 75, 90, 100, 110, 125, 150, 175, 200] as const;
+
 function getCurrentBlockType(editor: Editor): BlockType {
   if (editor.isActive("heading", { level: 1 })) return "1";
   if (editor.isActive("heading", { level: 2 })) return "2";
@@ -45,15 +47,47 @@ function getCurrentBlockType(editor: Editor): BlockType {
 export function Toolbar({
   editor,
   documentId,
+  zoom,
+  onZoomChange,
 }: {
   editor: Editor | null;
   documentId: Id<"documents">;
+  zoom: number;
+  onZoomChange: (zoom: number) => void;
 }) {
   const generateUploadUrl = useMutation(api.documentFiles.generateUploadUrl);
   const attachFile = useMutation(api.documentFiles.attach);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!editor) return null;
+  // Reactive to EVERY transaction (selection moves included), not just doc
+  // changes — plain `editor.isActive(...)` calls in JSX only re-evaluate
+  // when something else re-renders this component, so moving the cursor
+  // into e.g. a heading without editing left every button showing stale
+  // (pre-move) active state.
+  const toolbarState = useEditorState({
+    editor,
+    selector: ({ editor }) => {
+      if (!editor) return null;
+      return {
+        blockType: getCurrentBlockType(editor),
+        isBold: editor.isActive("bold"),
+        isItalic: editor.isActive("italic"),
+        isUnderline: editor.isActive("underline"),
+        isStrike: editor.isActive("strike"),
+        isBulletList: editor.isActive("bulletList"),
+        isOrderedList: editor.isActive("orderedList"),
+        alignLeft: editor.isActive({ textAlign: "left" }),
+        alignCenter: editor.isActive({ textAlign: "center" }),
+        alignRight: editor.isActive({ textAlign: "right" }),
+        alignJustify: editor.isActive({ textAlign: "justify" }),
+        isLink: editor.isActive("link"),
+        canUndo: editor.can().undo(),
+        canRedo: editor.can().redo(),
+      };
+    },
+  });
+
+  if (!editor || !toolbarState) return null;
 
   function setBlockType(value: BlockType) {
     if (value === "paragraph") {
@@ -95,8 +129,26 @@ export function Toolbar({
   }
 
   return (
-    <div className="no-print flex flex-nowrap items-center gap-1 overflow-x-auto border-b bg-background px-3 py-2">
-      <Select value={getCurrentBlockType(editor)} onValueChange={setBlockType}>
+    <div className="no-print flex h-11 flex-nowrap items-center gap-1 overflow-x-auto border-b bg-background px-3 py-2">
+      <Select
+        value={String(zoom)}
+        onValueChange={(value) => onZoomChange(Number(value))}
+      >
+        <SelectTrigger size="sm" className="w-20">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {ZOOM_LEVELS.map((level) => (
+            <SelectItem key={level} value={String(level)}>
+              {level}%
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Separator orientation="vertical" className="mx-1 h-6" />
+
+      <Select value={toolbarState.blockType} onValueChange={setBlockType}>
         <SelectTrigger size="sm" className="w-32">
           <SelectValue />
         </SelectTrigger>
@@ -112,28 +164,28 @@ export function Toolbar({
 
       <Toggle
         size="sm"
-        pressed={editor.isActive("bold")}
+        pressed={toolbarState.isBold}
         onPressedChange={() => editor.chain().focus().toggleBold().run()}
       >
         <Bold />
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive("italic")}
+        pressed={toolbarState.isItalic}
         onPressedChange={() => editor.chain().focus().toggleItalic().run()}
       >
         <Italic />
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive("underline")}
+        pressed={toolbarState.isUnderline}
         onPressedChange={() => editor.chain().focus().toggleUnderline().run()}
       >
         <Underline />
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive("strike")}
+        pressed={toolbarState.isStrike}
         onPressedChange={() => editor.chain().focus().toggleStrike().run()}
       >
         <Strikethrough />
@@ -143,7 +195,7 @@ export function Toolbar({
 
       <Toggle
         size="sm"
-        pressed={editor.isActive("bulletList")}
+        pressed={toolbarState.isBulletList}
         onPressedChange={() =>
           editor.chain().focus().toggleBulletList().run()
         }
@@ -152,7 +204,7 @@ export function Toolbar({
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive("orderedList")}
+        pressed={toolbarState.isOrderedList}
         onPressedChange={() =>
           editor.chain().focus().toggleOrderedList().run()
         }
@@ -164,7 +216,7 @@ export function Toolbar({
 
       <Toggle
         size="sm"
-        pressed={editor.isActive({ textAlign: "left" })}
+        pressed={toolbarState.alignLeft}
         onPressedChange={() =>
           editor.chain().focus().setTextAlign("left").run()
         }
@@ -173,7 +225,7 @@ export function Toolbar({
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive({ textAlign: "center" })}
+        pressed={toolbarState.alignCenter}
         onPressedChange={() =>
           editor.chain().focus().setTextAlign("center").run()
         }
@@ -182,7 +234,7 @@ export function Toolbar({
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive({ textAlign: "right" })}
+        pressed={toolbarState.alignRight}
         onPressedChange={() =>
           editor.chain().focus().setTextAlign("right").run()
         }
@@ -191,7 +243,7 @@ export function Toolbar({
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive({ textAlign: "justify" })}
+        pressed={toolbarState.alignJustify}
         onPressedChange={() =>
           editor.chain().focus().setTextAlign("justify").run()
         }
@@ -201,7 +253,7 @@ export function Toolbar({
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      <Toggle size="sm" pressed={editor.isActive("link")} onPressedChange={setLink}>
+      <Toggle size="sm" pressed={toolbarState.isLink} onPressedChange={setLink}>
         <LinkIcon />
       </Toggle>
       <Button
@@ -229,7 +281,7 @@ export function Toolbar({
         variant="ghost"
         size="icon-sm"
         onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
+        disabled={!toolbarState.canUndo}
       >
         <Undo />
       </Button>
@@ -237,7 +289,7 @@ export function Toolbar({
         variant="ghost"
         size="icon-sm"
         onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
+        disabled={!toolbarState.canRedo}
       >
         <Redo />
       </Button>

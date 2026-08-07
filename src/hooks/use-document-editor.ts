@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -40,6 +40,11 @@ export function useDocumentEditor(doc: Doc<"documents">) {
 
   const triggerAutocomplete = useAutocomplete();
 
+  // A ref (not just state) because onUpdate's closure is set once at editor
+  // creation — reading state here would risk it being stale.
+  const [autocompleteEnabled, setAutocompleteEnabledState] = useState(true);
+  const autocompleteEnabledRef = useRef(true);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -58,7 +63,9 @@ export function useDocumentEditor(doc: Doc<"documents">) {
     content: doc.content,
     onUpdate: ({ editor, transaction }) => {
       scheduleContentSave(editor.getJSON());
-      if (transaction.docChanged) triggerAutocomplete(editor);
+      if (transaction.docChanged && autocompleteEnabledRef.current) {
+        triggerAutocomplete(editor);
+      }
     },
   });
 
@@ -67,5 +74,17 @@ export function useDocumentEditor(doc: Doc<"documents">) {
     scheduleTitleSave(next);
   }
 
-  return { editor, title, setTitle };
+  function setAutocompleteEnabled(enabled: boolean) {
+    autocompleteEnabledRef.current = enabled;
+    setAutocompleteEnabledState(enabled);
+    if (!enabled) editor?.commands.hideSuggestion();
+  }
+
+  return {
+    editor,
+    title,
+    setTitle,
+    autocompleteEnabled,
+    setAutocompleteEnabled,
+  };
 }

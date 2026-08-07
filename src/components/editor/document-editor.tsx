@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { EditorContent, type Editor } from "@tiptap/react";
@@ -19,9 +20,11 @@ export function DocumentEditor({
   onTitleChange: (next: string) => void;
   documentId: Id<"documents">;
 }) {
+  const [zoom, setZoom] = useState(100);
+
   return (
     <div className="flex h-full flex-col">
-      <div className="no-print flex items-center gap-2 border-b px-4 py-2">
+      <div className="no-print flex h-12 items-center gap-2 border-b px-4 py-2">
         <Link href="/" className="shrink-0" aria-label="Back to home">
           <Image
             src="/reindex-logo.png"
@@ -39,12 +42,18 @@ export function DocumentEditor({
           placeholder="Draft title"
         />
       </div>
-      <Toolbar editor={editor} documentId={documentId} />
+      <Toolbar
+        editor={editor}
+        documentId={documentId}
+        zoom={zoom}
+        onZoomChange={setZoom}
+      />
       <div className="doc-canvas min-h-0 flex-1 overflow-auto bg-muted px-6 py-8">
         <SelectionToolbar editor={editor} />
         <EditorContent
           editor={editor}
           className="academic-doc doc-paper mx-auto"
+          style={{ zoom: `${zoom}%` }}
         />
       </div>
     </div>

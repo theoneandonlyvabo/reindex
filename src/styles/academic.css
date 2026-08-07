@@ -57,6 +57,31 @@
   margin: 0 0 1em 0;
 }
 
+/* Tailwind's preflight resets `ul`/`ol` to `list-style: none` and
+ * `padding: 0` globally — restore real markers + indentation here, scoped
+ * to the document only. */
+.academic-doc ul,
+.academic-doc ol {
+  margin: 0 0 1em 0;
+  padding-left: 1.5em;
+}
+
+.academic-doc ul {
+  list-style-type: disc;
+}
+
+.academic-doc ol {
+  list-style-type: decimal;
+}
+
+.academic-doc li {
+  margin: 0 0 0.25em 0;
+}
+
+.academic-doc li p {
+  margin: 0;
+}
+
 /* TipTap's contenteditable root gets a browser default focus outline that
  * hugs tightly around an empty first line, rendering as a stray box. */
 .ProseMirror {

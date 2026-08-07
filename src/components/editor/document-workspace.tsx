@@ -2,15 +2,23 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { PanelRightClose, PanelRightOpen } from "lucide-react";
+import { PanelRightClose, PanelRightOpen, Sparkles } from "lucide-react";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { useDocumentEditor } from "@/hooks/use-document-editor";
 import { DocumentEditor } from "./document-editor";
 import { AiSidebar } from "./ai-sidebar";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
-  const { editor, title, setTitle } = useDocumentEditor(doc);
+  const {
+    editor,
+    title,
+    setTitle,
+    autocompleteEnabled,
+    setAutocompleteEnabled,
+  } = useDocumentEditor(doc);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -26,7 +34,7 @@ export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
 
       {sidebarOpen ? (
         <aside className="no-print hidden w-full flex-col overflow-hidden border-l lg:flex lg:basis-[30%]">
-          <div className="flex items-center justify-between border-b px-4 py-2">
+          <div className="flex h-12 items-center justify-between border-b px-4 py-2">
             <div className="flex items-center gap-2">
               <Image
                 src="/reindex-logo.png"
@@ -45,6 +53,21 @@ export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
             >
               <PanelRightClose />
             </Button>
+          </div>
+          <div className="flex h-11 items-center justify-between border-b bg-background px-4 py-2">
+            <Label
+              htmlFor="autocomplete-toggle"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground"
+            >
+              <Sparkles className="size-3.5" />
+              Inline autocomplete
+            </Label>
+            <Switch
+              id="autocomplete-toggle"
+              size="sm"
+              checked={autocompleteEnabled}
+              onCheckedChange={setAutocompleteEnabled}
+            />
           </div>
           <AiSidebar editor={editor} documentTitle={title} />
         </aside>

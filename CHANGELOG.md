@@ -4,6 +4,44 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 00:35
+> "QC TIME. known bug: (1) ketika pengen nulis pointer / numbered list / general list text akan hilang (seharusnya bikin pointer dengan indentasi). (2) switcher Header / Normal Text skrg principle nya masih 'Add' yang dimana seharusnya 'Switcher' [...] (3) [...] harusnya di samping kiri ada index paper nya [...] (4) di sebelah kiri header switcher tambahin page zoom size (100% / 120% / etc) [...] ask questions if uncertain"
+
+- **Fix (root cause, bug 1):** `src/styles/academic.css` — Tailwind's preflight resets `ul`/`ol` to `list-style: none; padding: 0` globally, and academic.css never restored it for the document scope (only `h1`–`h3`/`p` had rules). Lists rendered with no marker and no indentation, reading as plain unindented paragraphs — not literally "text disappearing," but visually indistinguishable from body text, which is what prompted the report. Added `.academic-doc ul/ol/li` rules restoring real bullets/numbers + indentation
+- **Fix (root cause, bug 2):** `src/components/editor/toolbar.tsx` — every active-state check (`editor.isActive(...)` for the block-type dropdown AND all bold/italic/underline/strike/list/align/link toggle buttons, plus undo/redo's `can()` checks) was a plain inline call in JSX, which only re-evaluates when something else happens to re-render `Toolbar`. Moving the cursor into different text (a pure selection change, no doc edit) never re-renders it, so every control kept showing whatever was true the last time the doc actually changed — exactly the "switch applies but doesn't identify" bug reported. Replaced with `useEditorState` (the idiomatic Tiptap v2 fix for this exact class of bug), which subscribes to every transaction including pure selection moves. This was a toolbar-wide bug, not just the block-type switcher — bold/italic/list/align buttons had the same staleness
+- **New (feature, item 4):** page zoom control, `zoom` state now owned by `document-editor.tsx`, a `Select` (50–200%) in the toolbar to the left of the block-type switcher, applied to the paper via CSS `zoom` (not `transform: scale`, which doesn't reflow layout/scroll dimensions — `zoom` does, so the canvas's scrollable area stays correct at any level)
+- Verified: `tsc`, `eslint`, `next build` all clean
+- **Held for clarification (item 3):** see next chat turn — touches an explicit `MASTER_PROMPT.md` decision (CSS-counter auto-numbering), asked the user before changing it
+
+---
+
+### 00:15
+> "bikin switcher on off auto complete di bawah agent sidebar" + "[Image #9] height toolbar sama header agent sidebar samain, kalo kyk gini ga enak diliatnya"
+
+- **New:** `Switch` shadcn component (`src/components/ui/switch.tsx`, via `npx shadcn add switch` — first use of `@radix-ui/react-switch` in the app). Uses `rounded-full` internally (bypasses the app's flat-2px-radius rule) — a deliberate, scoped exception: a toggle switch's pill shape/circular thumb is the shape that communicates "this is a toggle," not a decorative radius choice. Flagging it rather than silently deviating
+- **New:** `autocompleteEnabled`/`setAutocompleteEnabled` in `src/hooks/use-document-editor.ts` — a ref (not just state) backs the `onUpdate` closure's read of it, since that closure is captured once at editor creation and a plain state read there would go stale. Disabling immediately clears any suggestion currently showing (`editor.commands.hideSuggestion()`)
+- **Fix (root cause, both height-alignment reports):** the toolbar's earlier `flex-wrap`→`flex-nowrap` fix (23:10 entry) addressed 2-row wrapping, but the border still didn't line up because the editor column has a whole EXTRA row above the toolbar (the document title bar, ~48px) that the sidebar's single header row (~44px) had no equivalent of — so even with correct individual row heights, their cumulative Y-position differed by the title bar's height. Fixed by splitting the sidebar header into two rows mirroring the editor's structure — a title row ("Reindex Agent") and a control-strip row below it — and giving all four rows (`document-editor.tsx` title bar, `toolbar.tsx`, and the sidebar's two new rows) explicit `h-12`/`h-11` Tailwind heights instead of relying on padding+content-height arithmetic to happen to match (fragile, unverifiable without a browser this session). The new control-strip row is where the autocomplete switch lives — giving the editor's toolbar a real structural counterpart on the sidebar side, not just a coincidental height match
+- **Fix:** `document-workspace.tsx` — the collapsed-sidebar "expand" button used `PanelRightClose` (the wrong icon, already imported `PanelRightOpen` but unused) — noticed while touching this file, corrected
+- Verified: `tsc`, `eslint`, `next build` all clean
+
+---
+
+### 23:58
+> "bikin rule buat inline auto complete HANYA AKTIF apabila kalimat yang sedang ditulis lebih dari 3 kata, kalo dibawah 3 kata jangan aktifin (itung per setelah '.' atau break line)"
+
+- **Adjust:** `src/hooks/use-autocomplete.ts` — added `currentSentenceWordCount()`, counting words in the text since the last `.` or line break (paragraph breaks already come through as literal `\n` from `doc.textBetween(..., "\n")`, so no separate handling needed for that case). The debounced trigger now bails before even calling the API if the current sentence has `MIN_SENTENCE_WORDS` (3) words or fewer — ghost text no longer interrupts short in-progress sentences
+
+---
+
+### 23:55
+> "/Users/aireladrivano/Downloads/favicon jadiin isi folder paketan favicon ini dan apply throughout the app." + "also overall color theme sedikit too saturated, kurangin saturationnya dikit ya. touch everything that manages colors."
+
+- **New:** `public/{apple-touch-icon.png,favicon-96x96.png,favicon.ico,favicon.svg,site.webmanifest,web-app-manifest-{192x192,512x512}.png}` — full favicon/PWA icon set copied in from the user-supplied package. `src/app/layout.tsx` `metadata.icons`/`metadata.manifest` rewritten to reference the proper set (was a single raw PNG doing double duty as the only favicon) — SVG + 96px PNG favicon, ICO shortcut, Apple touch icon, web manifest. In-app UI logo (`reindex-logo.png`, used in sidebar/sign-in/editor header) left untouched — that's product branding, not the browser/OS favicon, a different concern
+- **Adjust:** `src/app/globals.css` — every token's OKLCH chroma cut ~25% (hue/lightness untouched) across both light and dark themes, per "too saturated, touch everything that manages colors." `--destructive` (error/danger red) cut less aggressively (~17%) on purpose — needs to stay legible as a warning color, not just match the neutral-tone reduction. Checked `academic.css` (paper is `oklch(_ 0 0)`, already zero-chroma by design, correctly untouched) and grepped for other hardcoded colors — nothing else found. `public/site.webmanifest`'s `theme_color`/`background_color` recomputed (via an actual OKLCH→sRGB conversion, not eyeballed) to `#f5f2e8` to match the new desaturated `--background`, replacing the raw `#f7f3e6` anchor swatch it was set to earlier this session
+- Verified: `tsc --noEmit` and `next build` both clean
+
+---
+
 ### 23:40
 > "## Error Type\nRuntime Error\n\n## Error Message\nDatabase is closing/hidden\n... [Firebase IndexedDBLocalPersistence stack trace, thrown from setCurrentUser during sign-in] ... also : karena ini untuk lomba, kasih safety meassures deh EXPLICIT ERROR message kalo token abis blg sorry limit ai nya abis (maaf karena gratisan)"
 

@@ -12,8 +12,10 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { useDebouncedCallback } from "./use-debounced-callback";
+import { useAutocomplete } from "./use-autocomplete";
 import { FlashHighlight } from "@/components/editor/extensions/flash-highlight";
 import { PendingSelection } from "@/components/editor/extensions/pending-selection";
+import { Autocomplete } from "@/components/editor/extensions/autocomplete";
 
 const AUTOSAVE_DELAY_MS = 1000;
 
@@ -36,6 +38,8 @@ export function useDocumentEditor(doc: Doc<"documents">) {
     void updateTitle({ documentId: doc._id, title: next });
   }, AUTOSAVE_DELAY_MS);
 
+  const triggerAutocomplete = useAutocomplete();
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -49,10 +53,12 @@ export function useDocumentEditor(doc: Doc<"documents">) {
       }),
       FlashHighlight,
       PendingSelection,
+      Autocomplete,
     ],
     content: doc.content,
-    onUpdate: ({ editor }) => {
+    onUpdate: ({ editor, transaction }) => {
       scheduleContentSave(editor.getJSON());
+      if (transaction.docChanged) triggerAutocomplete(editor);
     },
   });
 

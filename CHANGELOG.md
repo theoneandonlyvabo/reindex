@@ -4,6 +4,19 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 23:10
+> "oke checks passed, continue phase selanjutnya dulu" (Phase 4: inline autocomplete) + "[Image #7] ini ga sejajar garisnya, benerin" (toolbar/sidebar-header border misalignment)
+
+- **New:** Phase 4 (inline autocomplete), checkpoint complete per the original plan:
+  - `src/app/api/complete/route.ts` (51L) — Groq `llama-3.1-8b-instant` via `generateText`, deliberately a separate model/provider from the Gemini routes (latency budget, fires on every typing pause). Takes `{ context }` (caller-truncated to the preceding text), server also caps to last 2000 chars defensively. Same `checkRateLimit(token, "complete")` gate, same `describeAiError` 429/502 mapping as chat/rewrite
+  - `src/components/editor/extensions/autocomplete.ts` (98L) — ghost text as a ProseMirror widget decoration (never real doc content until accepted, so it's outside selection/undo history). `showSuggestion`/`hideSuggestion`/`acceptSuggestion` commands; `Tab` accepts (explicitly re-positions the cursor after the inserted text via `TextSelection.create`, since default step-mapping bias could otherwise leave it before the insertion), `Escape` dismisses. The decoration plugin's own `apply(tr, value)` clears on ANY `docChanged`/`selectionSet` — that's the stale-suggestion guard, enforced at the transaction level rather than via an external listener
+  - `src/hooks/use-autocomplete.ts` (54L) — debounced (350ms) trigger, wired into the *existing* `onUpdate` in `use-document-editor.ts` (not a second `editor.on("update", ...)` listener). Aborts a still-in-flight fetch when a newer one starts (`AbortController`); drops a response if the cursor has since moved or a newer request has started (`requestId` ref) — belt-and-suspenders with the abort, since a slow response could theoretically still resolve after being superseded
+  - `.ai-ghost-text` CSS in `globals.css` — muted, `pointer-events: none`
+  - Verified: `tsc`, `eslint`, `next build` all clean; `/api/complete` registered as a dynamic route alongside `/api/chat` and `/api/rewrite`
+- **Fix (root cause):** `src/components/editor/toolbar.tsx` — the editor toolbar's bottom border sat lower than the sidebar header's, because the toolbar has ~17 controls and was `flex-wrap`, so it silently wrapped to 2 rows once the viewport narrowed with the sidebar open (the sidebar header is always 1 row). Changed to `flex-nowrap overflow-x-auto` — toolbar now stays a fixed single-row height and scrolls horizontally instead, guaranteeing both borders line up regardless of viewport width. The parent chain already had the `min-w-0` needed for the scroll to actually engage (`document-workspace.tsx`'s `min-w-0 flex-1 basis-[70%]` column), so no other layout change was needed
+
+---
+
 ### 22:20
 > "add ke backlog : onboarding screen (replace [Image #5]), beberapa page isinya hrs ngestate problem statement, bridging, "why use reindex?", showcase fature, and "get started"." + "[Image #6] why is the logo not centered? center it"
 

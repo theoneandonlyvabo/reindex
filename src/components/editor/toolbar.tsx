@@ -95,7 +95,7 @@ export function Toolbar({
   }
 
   return (
-    <div className="no-print flex flex-wrap items-center gap-1 border-b bg-background px-3 py-2">
+    <div className="no-print flex flex-nowrap items-center gap-1 overflow-x-auto border-b bg-background px-3 py-2">
       <Select value={getCurrentBlockType(editor)} onValueChange={setBlockType}>
         <SelectTrigger size="sm" className="w-32">
           <SelectValue />

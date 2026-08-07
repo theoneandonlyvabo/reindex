@@ -173,3 +173,11 @@
   border-radius: 2px;
   background-color: color-mix(in oklch, var(--primary), transparent 80%);
 }
+
+/* Inline autocomplete ghost text — Copilot-style greyed suggestion, Tab to
+ * accept / Esc to dismiss (see the `autocomplete` TipTap extension). */
+.ai-ghost-text {
+  color: var(--muted-foreground);
+  opacity: 0.6;
+  pointer-events: none;
+}

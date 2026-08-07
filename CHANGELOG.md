@@ -4,6 +4,22 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 17:50
+> "logo reindexnya centered, 'Google OAUTH' button tambahin logo google nya, bikin tombol show password" + "add '+' icon on New Draft, Sign out should just be an icon no text." + "dashboard reindex should look like this, tapi sesuain ke color palette dan style design current, ambil komposisi dan komponen dari screenshot gw aja" (Google Docs homepage reference) + "section ini boxnya dibikin 1:1.75 aja potrait jgn landscape"
+
+- **Adjust:** `sign-in/page.tsx` — logo centered in card header; Google button gets the real 4-color "G" mark (inline SVG); password field gets a show/hide toggle (`Eye`/`EyeOff`, `field-sizing` untouched)
+- **Adjust:** `dashboard/page.tsx` — rebuilt following the Google-Docs-homepage composition the user referenced (top bar with logo/search/sign-out, "Start a new draft" card, "Recent documents" grid), reskinned to the app's own warm palette and 2px-radius sharp style rather than copying Google's look. Search filters client-side by title. Document cards are portrait-oriented grid tiles instead of the old stacked list; "New draft" got a `Plus` icon, "Sign out" is now icon-only
+- Caught my own mistake mid-edit: initially used `rounded-full` on the new search input, which directly contradicts the earlier "every radius is exactly 2px" instruction — fixed before it shipped
+
+---
+
+### 17:18
+> "kok logo reindex ada bg putihnya? kan png log knp bs ada putihnya"
+
+- **Fix:** `public/reindex-logo.png` — the previous rasterization (macOS `qlmanage` thumbnail generator) baked an opaque white backdrop into the PNG despite it having an alpha channel (confirmed via pixel check: corner alpha was 255, not 0) — QuickLook's thumbnailer composites onto white by design, it doesn't preserve source transparency. Re-rendered via headless Chrome (`--default-background-color=00000000`, native 1080×1080 to avoid clipping), then cropped to content and resized to 512×512 with Pillow. Corner alpha now 0; no code changes needed since it's the same filename in `public/`
+
+---
+
 ### 17:10
 > "ubah semua icon svg reindex jd png aja, quality lbh oke, also diatas kiri (samping kiri judul dokumen tambahin logo reindex yg kalo diclick balik ke home page"
 

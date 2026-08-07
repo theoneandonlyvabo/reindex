@@ -71,7 +71,7 @@ export default function SignInPage() {
   return (
     <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-6 py-12">
       <Card className="w-full max-w-sm">
-        <CardHeader className="items-center text-center">
+        <CardHeader className="justify-items-center text-center">
           <Image
             src="/reindex-logo.png"
             alt="Reindex AI"

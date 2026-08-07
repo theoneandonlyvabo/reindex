@@ -4,6 +4,14 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 22:20
+> "add ke backlog : onboarding screen (replace [Image #5]), beberapa page isinya hrs ngestate problem statement, bridging, "why use reindex?", showcase fature, and "get started"." + "[Image #6] why is the logo not centered? center it"
+
+- **New:** `BACKLOG.md` — onboarding screen noted (not built): replace the bare `/` home page with problem statement → bridging → "why use Reindex?" → feature showcase → get-started CTA. Not scheduled, no code changes
+- **Fix (root cause):** `src/app/sign-in/page.tsx` — logo sat flush-left in the card header despite `items-center`. shadcn's `CardHeader` (`src/components/ui/card.tsx`) is CSS Grid, not flexbox — `items-center` sets `align-items` (the grid's vertical axis), not horizontal centering. `CardTitle`/`CardDescription` only *looked* centered because they're full-width blocks with `text-center`; the logo `<Image>` has an explicit `width={40}`, so as a grid item with a definite size it defaulted to `justify-items: start`. Changed to `justify-items-center` (the correct grid property for centering items with an intrinsic size along the inline axis) — checked for the same `CardHeader className="items-center` pattern elsewhere in the codebase, this was the only instance
+
+---
+
 ### 19:05
 > "[Image #1] problem" (sidebar chat: "Something went wrong. An error occurred." after a `search_web` call) + "[Image #2] ini jg" (rewrite toolbar: "The AI request failed. Please try again.") + "fitur ini kalo misal kita abis select text kemudian pindah fokus ke prompt box nya, selectionnya ilang, we dont want that, bikin supaya terus ada selama ai ngeprompt even ampe output ai udh masuk. also enter icon nya gausah icon ai juga, dibikin icon arrow right aja." + [browser NotFoundError: removeChild] + "the popup ai prompter is also not working"
 

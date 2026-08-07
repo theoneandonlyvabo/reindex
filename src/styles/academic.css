@@ -74,16 +74,33 @@
 }
 
 /*
- * On-screen "paper" surface: same A4 width and margin values as the print
- * @page rule below, so what you see while editing matches what prints.
- * Not a pagination engine — a single sheet that grows with content, no
- * page breaks/running headers, per MASTER_PROMPT.md.
+ * On-screen "paper": same A4 width and margin values as the print @page
+ * rule below, so what you see while editing matches what prints.
+ *
+ * Simulated pagination (src/components/editor/extensions/pagination.ts):
+ * .doc-paper is the CONTENT-FLOW column, still one continuous ProseMirror
+ * doc — real per-page editable regions would break cursor/selection/undo
+ * continuity. The pagination extension inserts spacer widgets that push
+ * content down at each computed page boundary; .doc-page-bg renders the
+ * separate white A4 sheets BEHIND that flow (one per computed page, inside
+ * .doc-page-frame), so it visually reads as separate pages.
  */
 .doc-paper {
-  width: 21cm;
-  max-width: 100%;
+  width: 100%;
   min-height: 29.7cm;
   padding: 2.54cm;
+}
+
+.doc-page-frame {
+  position: relative;
+  width: 21cm;
+  max-width: 100%;
+}
+
+.doc-page-bg {
+  position: absolute;
+  inset-inline: 0;
+  z-index: -1;
   /* Pure neutral, deliberately NOT var(--card) — the paper is exempt from
    * the app's warm theme regardless of light/dark mode. */
   background: oklch(1 0 0);
@@ -102,13 +119,22 @@
     margin: 2.54cm;
   }
 
+  /* Real print pagination is the browser's own @page handling — the
+   * on-screen simulated-pages layer above is irrelevant here and must not
+   * double up with it. */
+  .doc-page-bg,
+  .page-break-spacer {
+    display: none !important;
+  }
+
+  .doc-page-frame {
+    width: auto;
+  }
+
   .doc-paper {
     width: auto;
     min-height: 0;
     padding: 0;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
   }
 
   .doc-canvas {

@@ -11,17 +11,20 @@ import { SelectionToolbar } from "./selection-toolbar";
 import { DocumentOutline } from "./document-outline";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PAGE_GAP_PX, PAGE_HEIGHT_PX } from "@/lib/editor/pagination-geometry";
 
 export function DocumentEditor({
   editor,
   title,
   onTitleChange,
   documentId,
+  pageCount,
 }: {
   editor: Editor | null;
   title: string;
   onTitleChange: (next: string) => void;
   documentId: Id<"documents">;
+  pageCount: number;
 }) {
   const [zoom, setZoom] = useState(100);
   const [outlineOpen, setOutlineOpen] = useState(true);
@@ -76,13 +79,33 @@ export function DocumentEditor({
             <PanelLeftOpen />
           </Button>
         )}
-        <div className="doc-canvas min-h-0 flex-1 overflow-auto bg-muted px-6 py-8">
+        <div
+          className="doc-canvas min-h-0 flex-1 overflow-auto bg-muted px-6 py-8"
+          style={{ zoom: `${zoom}%` }}
+        >
+          {/* zoom lives on the canvas, not .doc-paper directly: .doc-paper
+           * has `max-width: 100%` (academic.css, a responsive safeguard) —
+           * applying zoom to .doc-paper itself let text render at the
+           * zoomed size while max-width clamped the PAGE back to the
+           * canvas's unzoomed width, since the constraint's own reference
+           * didn't scale with it. Zooming the canvas scales both together. */}
           <SelectionToolbar editor={editor} />
-          <EditorContent
-            editor={editor}
-            className="academic-doc doc-paper mx-auto"
-            style={{ zoom: `${zoom}%` }}
-          />
+          <div className="doc-page-frame mx-auto">
+            {/* Simulated page sheets, one per page the pagination
+             * extension computed — see academic.css and
+             * extensions/pagination.ts for how this works together. */}
+            {Array.from({ length: pageCount }).map((_, i) => (
+              <div
+                key={i}
+                className="doc-page-bg"
+                style={{
+                  top: i * (PAGE_HEIGHT_PX + PAGE_GAP_PX),
+                  height: PAGE_HEIGHT_PX,
+                }}
+              />
+            ))}
+            <EditorContent editor={editor} className="academic-doc doc-paper" />
+          </div>
         </div>
       </div>
     </div>

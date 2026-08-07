@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { PanelRightClose, PanelRightOpen, Sparkles } from "lucide-react";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { useDocumentEditor } from "@/hooks/use-document-editor";
@@ -18,6 +17,7 @@ export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
     setTitle,
     autocompleteEnabled,
     setAutocompleteEnabled,
+    pageCount,
   } = useDocumentEditor(doc);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -29,6 +29,7 @@ export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
           title={title}
           onTitleChange={setTitle}
           documentId={doc._id}
+          pageCount={pageCount}
         />
       </div>
 

@@ -4,6 +4,14 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 23:40
+> "## Error Type\nRuntime Error\n\n## Error Message\nDatabase is closing/hidden\n... [Firebase IndexedDBLocalPersistence stack trace, thrown from setCurrentUser during sign-in] ... also : karena ini untuk lomba, kasih safety meassures deh EXPLICIT ERROR message kalo token abis blg sorry limit ai nya abis (maaf karena gratisan)"
+
+- **Fix (root cause):** `src/lib/firebase.ts` — the earlier persistence fallback chain (17:05 entry) only protects `initializeAuth`'s one-time startup choice; it doesn't cover a runtime write failing on an already-open connection, which is what this crash actually was (thrown from `setCurrentUser` during sign-in, not from init). IndexedDB's connection can be closed out from under an in-flight write on tab-visibility races/multi-tab conflicts — a known upstream Firebase JS SDK fragility, not something our try/catch at init time could ever catch. Reordered the persistence chain to put `browserLocalPersistence` (localStorage, synchronous, no async-connection failure mode) first instead of `indexedDBLocalPersistence` — sidesteps the whole bug class rather than catching it after the fact. IndexedDB kept as a fallback for environments without localStorage
+- **Adjust:** `src/lib/ai/error-message.ts` — `describeAiError()`'s 429/quota message rewritten to be explicit and apologetic per request ("Sorry — we've hit today's AI usage limit. This demo runs on a free-tier API key..."), since this is competition-facing. Already the single source of truth wired into chat, rewrite, and complete — no per-route changes needed. Autocomplete's client (`use-autocomplete.ts`) still discards this message and fails silently by design (a popup on every failed keystroke-triggered ghost-text request would be worse UX than no suggestion) — the explicit apology surfaces on the two visible/deliberate AI actions (sidebar chat, selection-toolbar rewrite), not the passive background one
+
+---
+
 ### 23:10
 > "oke checks passed, continue phase selanjutnya dulu" (Phase 4: inline autocomplete) + "[Image #7] ini ga sejajar garisnya, benerin" (toolbar/sidebar-header border misalignment)
 

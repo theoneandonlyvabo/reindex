@@ -21,17 +21,20 @@ export const firebaseApp = getApps().length
   ? getApp()
   : initializeApp(firebaseConfig);
 
-// Explicit persistence fallback chain: IndexedDB can throw ("Database is
-// closing/hidden") on tab-visibility races or during dev Fast Refresh.
-// initializeAuth automatically falls back to the next entry instead of
-// throwing. try/catch guards Fast Refresh re-evaluating this module against
-// "Auth already initialized".
+// browserLocalPersistence (localStorage) is primary, not
+// indexedDBLocalPersistence: IndexedDB's connection can be closed out from
+// under an in-flight write ("Database is closing/hidden") on tab-visibility
+// races, multi-tab conflicts, or during dev Fast Refresh — a known
+// upstream Firebase JS SDK fragility. localStorage writes are synchronous
+// and don't have that failure mode. IndexedDB stays as a fallback for
+// environments where localStorage is unavailable. try/catch guards Fast
+// Refresh re-evaluating this module against "Auth already initialized".
 export const firebaseAuth = (() => {
   try {
     return initializeAuth(firebaseApp, {
       persistence: [
-        indexedDBLocalPersistence,
         browserLocalPersistence,
+        indexedDBLocalPersistence,
         inMemoryPersistence,
       ],
     });

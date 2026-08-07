@@ -15,7 +15,7 @@ export default function Home() {
         priority
       />
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Reindex AI</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">Reindex AI</h1>
         <p className="max-w-md text-muted-foreground">
           AI-powered document editor for theses, dissertations, and papers —
           with citations you can verify back to the source.

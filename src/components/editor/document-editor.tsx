@@ -4,10 +4,13 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { EditorContent, type Editor } from "@tiptap/react";
+import { PanelLeftOpen } from "lucide-react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Toolbar } from "./toolbar";
 import { SelectionToolbar } from "./selection-toolbar";
+import { DocumentOutline } from "./document-outline";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export function DocumentEditor({
   editor,
@@ -21,6 +24,7 @@ export function DocumentEditor({
   documentId: Id<"documents">;
 }) {
   const [zoom, setZoom] = useState(100);
+  const [outlineOpen, setOutlineOpen] = useState(true);
 
   return (
     <div className="flex h-full flex-col">
@@ -48,13 +52,33 @@ export function DocumentEditor({
         zoom={zoom}
         onZoomChange={setZoom}
       />
-      <div className="doc-canvas min-h-0 flex-1 overflow-auto bg-muted px-6 py-8">
-        <SelectionToolbar editor={editor} />
-        <EditorContent
-          editor={editor}
-          className="academic-doc doc-paper mx-auto"
-          style={{ zoom: `${zoom}%` }}
-        />
+      {/* Outline sits BELOW the title bar + toolbar (which span the full
+       * editor column width), alongside only the paper canvas — not a
+       * full-height sibling column like the AI sidebar. */}
+      <div className="relative flex min-h-0 flex-1">
+        {outlineOpen ? (
+          <DocumentOutline
+            editor={editor}
+            onCollapse={() => setOutlineOpen(false)}
+          />
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="no-print absolute top-2 left-2 z-10 hidden lg:flex"
+            onClick={() => setOutlineOpen(true)}
+          >
+            <PanelLeftOpen />
+          </Button>
+        )}
+        <div className="doc-canvas min-h-0 flex-1 overflow-auto bg-muted px-6 py-8">
+          <SelectionToolbar editor={editor} />
+          <EditorContent
+            editor={editor}
+            className="academic-doc doc-paper mx-auto"
+            style={{ zoom: `${zoom}%` }}
+          />
+        </div>
       </div>
     </div>
   );

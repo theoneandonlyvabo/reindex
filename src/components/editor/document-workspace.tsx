@@ -23,7 +23,7 @@ export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
 
   return (
     <div className="flex min-h-0 flex-1 overflow-hidden">
-      <div className="min-w-0 flex-1 lg:basis-[70%]">
+      <div className="min-w-0 flex-1 lg:basis-[78%]">
         <DocumentEditor
           editor={editor}
           title={title}
@@ -33,7 +33,7 @@ export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
       </div>
 
       {sidebarOpen ? (
-        <aside className="no-print hidden w-full flex-col overflow-hidden border-l lg:flex lg:basis-[30%]">
+        <aside className="no-print hidden w-full flex-col overflow-hidden border-l lg:flex lg:basis-[22%]">
           <div className="flex h-12 items-center justify-between border-b px-4 py-2">
             <div className="flex items-center gap-2">
               <Image

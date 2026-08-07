@@ -4,6 +4,26 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 01:05
+> "[Image #6] Outline menu jangan setara sama semua element, tuck dia dibawah toolbar utama (vertically under kyk gambar ini. nih spesifik disininya [Image #7] kalo lu liat di sejajar paper kan bukan toolbar utama" (Google Docs reference: outline panel sits below the toolbar, alongside the page only) + "reduce width agent sidebar, increase outline sidebar menu SEDIKIT"
+
+- **Fix:** the outline panel was a full-height sibling column (alongside title bar + toolbar too, like the AI sidebar), not tucked under the toolbar the way the user's Google Docs reference showed. Moved `<DocumentOutline>` from `document-workspace.tsx` into `document-editor.tsx`, nested in a new row below the title bar + toolbar (which now span the full editor-column width) and beside only `.doc-canvas` — the AI sidebar is intentionally unchanged (it does span full height in the same Google Docs reference, e.g. their Gemini panel)
+- **Adjust:** `document-workspace.tsx` — AI sidebar `lg:basis-[30%]` → `22%`, editor column `70%` → `78%`; `document-outline.tsx` — outline `lg:basis-[20%]` → `24%` (relative to the editor column, per "reduce agent sidebar, increase outline slightly")
+- Verified: `tsc`, `eslint` clean on all touched files; full `next build` verified right before this round of layout tweaks (unchanged files since, no need to re-run)
+
+---
+
+### 00:50
+> Answers to the clarifying questions on item 3: remove the "BAB I"/"1.1" CSS prefix from the paper entirely; new collapsible left column for the outline panel; clicking an entry jumps to that heading.
+
+- **Adjust (intentional, confirmed change to a documented decision):** `src/styles/academic.css` — removed the `counter-reset`/`counter-increment`/`::before` rules that auto-prefixed headings with "BAB I" / "1.1" / "1.1.1" on the paper (this was an explicit `MASTER_PROMPT.md` decision — see the AskUserQuestion exchange this turn; user chose to change it, so this is a confirmed deviation, not a silent one). Headings on the paper now show exactly what's typed, nothing auto-inserted
+- **New:** `src/lib/editor/heading-outline.ts` — `buildOutline()`, ports the exact same chapter.section.subsection numbering scheme the removed CSS counters used to render, now computed in JS by walking `editor.state.doc` for heading nodes
+- **New:** `src/components/editor/document-outline.tsx` — collapsible left-column panel (editor now a 3-way split: outline 20% / paper 50% / AI sidebar 30%, was 70/30), reactive via `useEditorState` (same pattern as the toolbar fix). Clicking an entry does `setTextSelection(pos).scrollIntoView()`. H1 entries bolded, others muted, indented by level
+- **Adjust:** `document-workspace.tsx` — wired the outline panel in, collapse/expand button (`PanelLeftOpen`/`PanelLeftClose`) mirroring the existing right-sidebar pattern
+- Verified: `tsc`, `eslint`, `next build` all clean
+
+---
+
 ### 00:35
 > "QC TIME. known bug: (1) ketika pengen nulis pointer / numbered list / general list text akan hilang (seharusnya bikin pointer dengan indentasi). (2) switcher Header / Normal Text skrg principle nya masih 'Add' yang dimana seharusnya 'Switcher' [...] (3) [...] harusnya di samping kiri ada index paper nya [...] (4) di sebelah kiri header switcher tambahin page zoom size (100% / 120% / etc) [...] ask questions if uncertain"
 

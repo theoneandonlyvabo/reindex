@@ -10,47 +10,32 @@
   font-size: 12pt;
   line-height: 1.5;
   text-align: justify;
-  counter-reset: academic-chapter;
   /* Pure neutral black, deliberately NOT the app's warm --foreground —
    * the paper stays paper regardless of the chrome's theme. */
   color: oklch(0.145 0 0);
 }
 
+/* No more CSS-counter "BAB I" / "1.1" prefix on the paper itself (removed
+ * per explicit user decision) — headings show exactly what's typed.
+ * Chapter/section/subsection numbering now lives in the outline panel
+ * instead, computed in JS by src/lib/editor/heading-outline.ts using the
+ * same chapter.section.subsection scheme this used to render inline. */
 .academic-doc h1 {
-  counter-increment: academic-chapter;
-  counter-reset: academic-section;
   font-size: 14pt;
   font-weight: bold;
   text-align: center;
   margin-top: 2em;
 }
 
-.academic-doc h1::before {
-  content: "BAB " counter(academic-chapter, upper-roman);
-  display: block;
-}
-
 .academic-doc h2 {
-  counter-increment: academic-section;
-  counter-reset: academic-subsection;
   font-size: 12pt;
   font-weight: bold;
-}
-
-.academic-doc h2::before {
-  content: counter(academic-chapter) "." counter(academic-section) "  ";
 }
 
 .academic-doc h3 {
-  counter-increment: academic-subsection;
   font-size: 12pt;
   font-weight: bold;
   font-style: italic;
-}
-
-.academic-doc h3::before {
-  content: counter(academic-chapter) "." counter(academic-section) "."
-    counter(academic-subsection) "  ";
 }
 
 .academic-doc p {

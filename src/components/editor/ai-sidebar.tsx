@@ -438,14 +438,17 @@ export function AiSidebar({
         </div>
       </form>
 
-      <div className="no-print flex items-center justify-center border-t px-4 py-2">
+      <div className="no-print flex items-center justify-center border-t px-4 py-1.5">
         <Select defaultValue="gemini">
-          <SelectTrigger size="sm" className="w-44">
+          <SelectTrigger
+            size="sm"
+            className="w-36 gap-1 border-none bg-transparent px-2 text-xs shadow-none hover:bg-accent"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="gemini">
-              <GeminiIcon className="size-3.5" />
+              <GeminiIcon className="size-3" />
               Gemini 3.5 Flash
             </SelectItem>
             <SelectItem value="more" disabled>

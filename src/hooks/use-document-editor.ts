@@ -8,6 +8,12 @@ import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import TextStyle from "@tiptap/extension-text-style";
+import FontFamily from "@tiptap/extension-font-family";
+import Color from "@tiptap/extension-color";
+import Highlight from "@tiptap/extension-highlight";
+import Superscript from "@tiptap/extension-superscript";
+import Subscript from "@tiptap/extension-subscript";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
@@ -17,6 +23,9 @@ import { FlashHighlight } from "@/components/editor/extensions/flash-highlight";
 import { PendingSelection } from "@/components/editor/extensions/pending-selection";
 import { Autocomplete } from "@/components/editor/extensions/autocomplete";
 import { Pagination } from "@/components/editor/extensions/pagination";
+import { FontSize } from "@/components/editor/extensions/font-size";
+import { LineHeight } from "@/components/editor/extensions/line-height";
+import { Indent } from "@/components/editor/extensions/indent";
 
 const AUTOSAVE_DELAY_MS = 1000;
 
@@ -48,6 +57,9 @@ export function useDocumentEditor(doc: Doc<"documents">) {
 
   const editor = useEditor({
     immediatelyRender: false,
+    editorProps: {
+      attributes: { spellcheck: "true" },
+    },
     extensions: [
       StarterKit,
       Underline,
@@ -57,9 +69,26 @@ export function useDocumentEditor(doc: Doc<"documents">) {
       Placeholder.configure({
         placeholder: "Start writing your thesis draft...",
       }),
+      TextStyle,
+      FontFamily,
+      Color,
+      Highlight.configure({ multicolor: true }),
+      Superscript,
+      Subscript,
+      FontSize,
+      LineHeight,
       FlashHighlight,
       PendingSelection,
+      // Must come before Indent: both bind Tab, and ProseMirror tries
+      // keymap plugins in extension-registration order, stopping at the
+      // first handler that returns true. Autocomplete's handler correctly
+      // no-ops (returns false) when there's no suggestion showing, which
+      // lets Indent's Tab binding take over — but only if Autocomplete is
+      // tried first. Reversed, Indent would swallow every Tab press
+      // (it succeeds almost unconditionally) and autocomplete-accept would
+      // never fire.
       Autocomplete,
+      Indent,
       Pagination,
     ],
     content: doc.content,

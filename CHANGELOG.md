@@ -4,6 +4,50 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-08
 
+### 02:35
+> "oke, sedikit salah, gak juga harus semua block sama panjangnya... mksd gw tuh yg penting ga berubah2 kalo value di dalemnya berubah, adjust lagi supaya tiap kompoen block di toolbar width nya adjusted tapi fixed length. also [image] kecilin model switcher di ai sidebar ini, terlalu gede dikit. sama property selected text kalo kita pindah fokus ke toolbar jg jangan ilangin selectionnya (sama kyk popup prompt box). line height (vertical space antar paragraf) is still not working also. Tab and Shift + Tab masih belom bisa dipake shortcutnya buat indentasi, fix. Remove attach dan photo dari toolbar, dia ga seharusnya ada di situ (but keep the code & functions), begitu juga dengan export pdf). [image] closed sidebar button posisinya kurang enak, adjust ya."
+
+Seven fixes, one confirmation (per-box fixed width was already correct — each Select already had its own distinct `w-*`, not a uniform value, so no change needed there):
+
+- **Fix:** `src/components/editor/toolbar.tsx` — clicking any toolbar control blurred the editor and dimmed the native text selection; added an `onMouseDown` handler on the toolbar root that pins the selection via the existing `pendingSelection` extension (same mechanism the selected-text-edit popup already used), before the blur happens
+- **Fix:** `src/components/editor/extensions/line-height.ts` — a pure `line-height` change is invisible on any paragraph that doesn't wrap to a 2nd line, which is most of them; now pairs each of the 4 preset values with a matching `margin-bottom` (the "1.5" preset matches `.academic-doc p`'s existing 1em default, so it's a no-op until changed) — addresses what the user is actually testing ("vertical space antar paragraf")
+- **Fix:** `src/components/editor/extensions/indent.ts` — added `Tab`/`Shift-Tab` keyboard shortcuts (`addKeyboardShortcuts`) for indent/outdent, previously toolbar-button-only
+- **Fix (regression caught before shipping):** `src/hooks/use-document-editor.ts` — `Indent`'s new Tab binding would have silently broken autocomplete-accept (also bound to Tab, registered after Indent — ProseMirror tries keymap plugins in registration order and stops at the first handler returning `true`; `indent()` succeeds almost unconditionally, so it would've swallowed every Tab press before Autocomplete's handler ever ran). Reordered `Autocomplete` before `Indent`
+- **Adjust:** `toolbar.tsx` — Link, Image, and Export PDF moved out of the visible row into the existing Settings dropdown menu (`Insert link` / `Insert image` / `Export as PDF`) per explicit instruction to remove them from the toolbar while keeping the underlying code — `setLink`, `handleImageSelected`, and the hidden file input are all still wired, just to menu items instead of toolbar buttons, so nothing went dead/unused
+- **Adjust:** `src/components/editor/document-workspace.tsx` — collapsed-sidebar reopen button moved from `top-16` (which landed inside the toolbar row's vertical space, colliding with its far-right content) to `top-2` (aligned with the title bar, clear of the toolbar entirely)
+- **Adjust:** `src/components/editor/ai-sidebar.tsx` — model switcher pill `w-44` → `w-36`, switched to the same borderless/transparent trigger style as the sibling Writing/Planning/Research selector above it, for a visually lighter/smaller footprint
+- Verified: `tsc --noEmit`, `eslint`, `next build` all clean. Still no Chrome extension this session — the line-height/margin fix, Tab-vs-autocomplete interaction, and pending-selection-on-toolbar-click are all reasoned from source (TipTap's `mergeAttributes`/`updateAttributes`/keymap-ordering behavior, cross-checked against the already-working `TextAlign` extension as reference) rather than watched rendering
+
+---
+
+### 02:19
+> "every box / capsule on the toolbar should have a fixed width, whats inside it should condition FROM the box itself not the other way around (ex: Times New Roman -> Times New Ro...), etc etc. box dropdowns SHOULD ALWAYS drop DOWN and FLOW DOWN, never make the popup go upwards."
+
+Two root-cause fixes in the shared `ui/` primitives (not per-instance patches in toolbar.tsx), since both bugs affect every consumer of these components, not just the toolbar:
+
+- **Fix (truncation):** `src/components/ui/select.tsx` — `SelectTrigger`'s `data-slot="select-value"` child had no `min-w-0`, so as a flex item it defaulted to `min-width: auto` and grew to fit its content (e.g. "Times New Roman") instead of respecting the trigger's own fixed `w-*`, defeating `line-clamp-1`'s truncation entirely — classic flexbox truncation bug. Added `min-w-0` to that child plus `overflow-hidden` on the trigger itself
+- **Fix (upward flip):** `SelectContent` defaulted to Radix's `position="item-aligned"` mode, which aligns the popup to the selected item's position in the list rather than the trigger — for an item near the end of a long list, that can open mostly upward. Switched the default to `position="popper"` (the component's CSS already had popper-specific classes pre-built, unused until now) with explicit `side="bottom"` and `avoidCollisions={false}`, so it always renders below and never auto-flips regardless of viewport space
+- **Fix (upward flip, same root cause):** `src/components/ui/popover.tsx`, `dropdown-menu.tsx` — both default to Radix's `avoidCollisions={true}`, which flips content above the trigger when it detects insufficient room below; set `side="bottom"` + `avoidCollisions={false}` on both, matching the Select fix
+- Verified: `tsc --noEmit`, `eslint`, `next build` clean. Still no Chrome extension this session, so the actual truncation/positioning result is unverified visually — logic verified by reading Radix's positioning API, not by looking at it render
+
+---
+
+### 02:12
+> "bikin semua fitur toolbar google docs available di reindex. ask questions on what should we exclude and how each feature sits / functions in this app. ASK EVERYTHING" + two mid-turn follow-ups: "add 1 'menu'/'setting' button on the most left on the toolbar, move the undo redo button to the right of the 'menu'/setting' button, make the scrollbar invisible..., i do like scrolling the toolbar instead of using the 3 dots to open another menu." + "for all color picker use this format instead [image] do not give users full rgb bar right away, make them click additional 'Custom Colors' for full flexibility."
+
+Brought `src/components/editor/toolbar.tsx` up to full Google Docs toolbar parity, after 3 rounds of scoping questions (12 decisions — font controls, line spacing, color, heading depth, find/replace, comments, spellcheck, format painter, checklist, indent, sub/superscript, clear formatting):
+
+- **New:** `src/components/editor/extensions/font-size.ts`, `line-height.ts`, `indent.ts` — no official TipTap v2 packages cover these; small `Extension`s following this codebase's existing custom-extension pattern (global attributes + inline-style render, same shape as `pending-selection.ts`)
+- **New:** `@tiptap/extension-text-style`, `-color`, `-font-family`, `-highlight`, `-superscript`, `-subscript` (^2.27.2) wired into `src/hooks/use-document-editor.ts`, plus `editorProps.attributes.spellcheck` for native browser spell-check
+- **New:** `src/components/editor/toolbar-color-input.tsx` — preset swatch-grid color picker (grayscale row + generated hue/shade matrix via HSL→hex, no hardcoded magic hex values) behind a `Popover`, with a "Custom colors…" action that defers to a native `<input type="color">` for arbitrary hex — per explicit instruction not to surface full RGB by default
+- **New:** `src/components/ui/popover.tsx`, `dropdown-menu.tsx` — added following this repo's existing per-primitive `ui/` wrapper convention (Radix via the already-installed `radix-ui` package, no new dependency)
+- **New:** font family (11 system-safe fonts, no webfont loading) + font size stepper, text/highlight color, line-spacing select (1/1.15/1.5/2), superscript/subscript, indent/outdent (lists via `sinkListItem`/`liftListItem`, paragraphs via the new attribute), clear formatting
+- **Adjust:** toolbar reordered — leftmost is now a settings menu (⚙, currently just a spell-check toggle) + Undo/Redo, per mid-turn follow-up; `.scrollbar-hide` utility added to `globals.css` and applied to the toolbar's `overflow-x-auto` row (scrolling still works, chrome hidden) — no overflow "3-dot" menu, by explicit preference
+- **Excluded** (asked, explicitly declined): find & replace (Ctrl+F suffices), comments (no realtime collaborator to address), format painter, checklist/to-do list, extra heading levels beyond H1-H3 (outline panel's numbering only goes 3 deep)
+- Verified: `tsc --noEmit`, `eslint`, `next build` all clean. No Chrome extension available this session — interactive verification (popover positioning, color picker click-through, indent/list interplay, toolbar scroll feel) unverified in-browser
+
+---
+
 ### 01:37
 > "run BACKLOG.md and ask me all he questions needed."
 

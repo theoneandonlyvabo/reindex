@@ -184,3 +184,15 @@
   opacity: 0.6;
   pointer-events: none;
 }
+
+/* Scrolling still works identically — this only hides the track/thumb
+ * chrome, for toolbars meant to be swiped through rather than read as a
+ * "how much is left" indicator. */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

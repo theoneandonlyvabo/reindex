@@ -66,7 +66,7 @@ export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
         <Button
           variant="ghost"
           size="icon-sm"
-          className="no-print absolute top-16 right-2 hidden lg:flex"
+          className="no-print absolute top-2 right-2 hidden lg:flex"
           onClick={() => setSidebarOpen(true)}
         >
           <PanelRightOpen />

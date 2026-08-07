@@ -1,5 +1,11 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  browserLocalPersistence,
+  getAuth,
+  inMemoryPersistence,
+  indexedDBLocalPersistence,
+  initializeAuth,
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,7 +21,24 @@ export const firebaseApp = getApps().length
   ? getApp()
   : initializeApp(firebaseConfig);
 
-export const firebaseAuth = getAuth(firebaseApp);
+// Explicit persistence fallback chain: IndexedDB can throw ("Database is
+// closing/hidden") on tab-visibility races or during dev Fast Refresh.
+// initializeAuth automatically falls back to the next entry instead of
+// throwing. try/catch guards Fast Refresh re-evaluating this module against
+// "Auth already initialized".
+export const firebaseAuth = (() => {
+  try {
+    return initializeAuth(firebaseApp, {
+      persistence: [
+        indexedDBLocalPersistence,
+        browserLocalPersistence,
+        inMemoryPersistence,
+      ],
+    });
+  } catch {
+    return getAuth(firebaseApp);
+  }
+})();
 
 /** Fresh ID token for the current user, for authenticating Next.js AI routes. */
 export async function getIdToken(): Promise<string> {

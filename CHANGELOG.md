@@ -2,6 +2,28 @@
 
 Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.md > Changelog Policy. Grouped by day, newest day and newest entry on top.
 
+## 2026-08-07
+
+### 17:10
+> "ubah semua icon svg reindex jd png aja, quality lbh oke, also diatas kiri (samping kiri judul dokumen tambahin logo reindex yg kalo diclick balik ke home page"
+
+- **New:** `public/reindex-logo.png` (512×512, rasterized from the source SVG via macOS `qlmanage` — no new dependency). All 6 logo usages (favicon, home hero, sign-in header, sidebar message/thinking icons, sidebar header) switched from `.svg` to `.png`
+- **New:** `document-editor.tsx` — logo added left of the document title, wrapped in a `next/link` back to `/`
+
+---
+
+### 17:05
+> Batch of QC/branding/bugfix requests: border-radius→2px, markdown rendering in chat, official logo as favicon/logo/sidebar icon, prettier error state with sad-face icon, warm color theme (iterated to an exact reference swatch #f7f3e6), Firebase Auth "Database is closing/hidden" crash, sidebar padding, document-title input clipping, timestamps on user chat messages.
+
+- **New:** `src/app/globals.css` — all 7 theme radius vars flattened to `2px` (was a calc-derived scale); single point of control, no component files touched
+- **New:** `react-markdown` + `remark-gfm`, `src/components/editor/chat-markdown.tsx` — agent replies were showing raw `**bold**`/no line breaks; now parsed into real elements. Applies to agent text + search_web answers only, not user messages
+- **New:** `public/reindex-logo.svg` (official logo, user-supplied) wired as: favicon (`layout.tsx` metadata.icons, replacing default `favicon.ico`), home page hero, sign-in card header, AI sidebar message/thinking icons and header — all via `next/image` with `unoptimized` (SVG, no raster benefit)
+- **Fix:** `ai-sidebar.tsx` error state — was a bare "An error occurred" box; redesigned with a `Frown` icon, friendly copy, and the actual error message. Root cause of the error itself (separate from the UI): Gemini quota exhaustion from heavy same-day testing — external/account-level, not a code bug
+- **Adjust:** `globals.css` color palette — iterated warm-tone request twice: first pass (hue 55-65) still read pink per feedback; final pass anchors on the user's exact reference swatch `#f7f3e6` (computed to `oklch(0.964 0.018 92.7)`), hue ~75-90 across all tokens, both themes. `.doc-paper`/`.academic-doc` in `academic.css` explicitly hardcoded to pure neutral (not `var(--card)`/`var(--foreground)`) so the paper stays exempt as requested
+- **Fix:** `src/lib/firebase.ts` — Firebase Auth's default IndexedDB persistence can throw "Database is closing/hidden" on tab-visibility races with no fallback (known upstream SDK issue). Switched to `initializeAuth` with an explicit persistence fallback chain (indexedDB → browserLocal → inMemory), guarded against Fast-Refresh re-init
+- **Fix:** `document-editor.tsx` — title `<input>` used `w-fit`, which doesn't work on inputs (they don't shrink-wrap to value content) — titles were clipping instead of growing. Switched to `field-sizing: content`
+- **Adjust:** sidebar padding increased (`px-4 py-3`→`px-5 py-5`, input row `p-3`→`p-4`); user chat messages now show a send-time timestamp, captured in the send handler (not render/effect — avoided two rounds of React Compiler purity lint errors, `Date.now()`/setState are impure in render or effect bodies)
+
 <!-- Format:
 ## YYYY-MM-DD
 
@@ -16,6 +38,22 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 -->
 
 ## 2026-08-07
+
+### 14:55
+> "change semua border radius jadi ONLY 2px, nothing else (gw mau sharp look gitu)" + mid-turn: "[Image #10] generated text output di chatbot optimize dong formatingnya, jangan jadiin semuanya 1 block gini susah dibaca, pake property real yang semua chatbot gunakan (enter, pointers, no "** **", etc)"
+
+- **Adjust:** `src/app/globals.css` — all 7 theme radius variables (`--radius-sm` through `--radius-4xl`) and base `--radius` flattened to `2px` (were a calc-derived scale off a 0.625rem base). Single point of control: every `rounded-*` utility app-wide, including shadcn's `rounded-[min(var(--radius-md),Npx)]` expressions in button/toggle/select, resolves through these — no component files touched
+- **New:** `react-markdown@10.1.0` + `remark-gfm@4.0.1`, `src/components/editor/chat-markdown.tsx` — agent chat responses were rendering raw markdown (`**bold**` shown literally, no real line breaks/bullets) since the sidebar just dumped `part.text`/`output.answer` into a plain `<p>`. Now parsed into real elements (bold, lists, links, paragraphs) with compact styling matching the sidebar's text scale. User messages intentionally still render as plain text (no reason to markdown-parse what a person typed)
+
+---
+
+### 14:41
+> "ubah default texts reindex dari bahasa indo jadi bahasa inggris"
+
+- **Adjust:** all default/UI copy switched Indonesian → English across `app/{page,layout,sign-in,dashboard,doc/[id]}`, `components/{auth/require-auth,editor/{document-editor,toolbar,ai-sidebar}}`, `lib/{ai/prompts,editor/{apply-edit,serialize}}`, `hooks/use-document-editor`, `app/api/chat/route.ts` (tool descriptions + 429 message + Perplexity prompt), `convex/documents.ts` (default title) — covers UI labels/placeholders/errors, the AI system prompt, and tool-call messages shown in the sidebar
+- **Adjust:** `app/dashboard/page.tsx` — date formatter locale `id-ID` → `en-US` to match
+
+---
 
 ### 14:16
 > "QC lagi. (1) spacing di agent sidebar masih kacau, gabisa bedain antara mana prompt user dan hasil generation ai. (2) ini pertanyaan sih, kyk penanda perubahan (diff) memang blm diimplement apa kita drop? Karena tadi pas gw prompt dia lgsg nulis aja, tanpa mikirin apapun. (3) masih ada korelasi dgn poin 2, ai agent hanya nulis text tanpa mikir indentasi, page break, dan lain-lain padahal seharusnya lebih aware."

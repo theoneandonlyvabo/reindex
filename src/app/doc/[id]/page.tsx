@@ -15,7 +15,7 @@ function DocumentPageContent() {
   if (doc === undefined) {
     return (
       <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-        Memuat dokumen...
+        Loading document...
       </div>
     );
   }
@@ -23,7 +23,7 @@ function DocumentPageContent() {
   if (doc === null) {
     return (
       <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-        Dokumen tidak ditemukan atau Anda tidak memiliki akses.
+        Document not found or you don&apos;t have access.
       </div>
     );
   }

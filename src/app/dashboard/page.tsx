@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import type { Id } from "../../../convex/_generated/dataModel";
 
-const dateFormatter = new Intl.DateTimeFormat("id-ID", {
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 });
@@ -40,26 +40,26 @@ function DashboardContent() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Dokumen Anda
+            Your documents
           </h1>
           <p className="text-sm text-muted-foreground">
-            Draf skripsi, tesis, dan paper yang sedang Anda kerjakan.
+            Thesis, dissertation, and paper drafts you&apos;re working on.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={handleCreate}>Draf baru</Button>
+          <Button onClick={handleCreate}>New draft</Button>
           <Button variant="ghost" onClick={() => signOut(firebaseAuth)}>
-            Keluar
+            Sign out
           </Button>
         </div>
       </div>
 
       {documents === undefined ? (
-        <p className="text-sm text-muted-foreground">Memuat dokumen...</p>
+        <p className="text-sm text-muted-foreground">Loading documents...</p>
       ) : documents.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Belum ada draf. Mulai draf skripsi pertama Anda.
+            No drafts yet. Start your first thesis draft.
           </CardContent>
         </Card>
       ) : (
@@ -76,7 +76,7 @@ function DashboardContent() {
                     {doc.title}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Diperbarui {dateFormatter.format(doc.updatedAt)}
+                    Updated {dateFormatter.format(doc.updatedAt)}
                   </p>
                 </div>
                 <Button
@@ -87,7 +87,7 @@ function DashboardContent() {
                     void handleRemove(doc._id);
                   }}
                 >
-                  Hapus
+                  Delete
                 </Button>
               </CardHeader>
             </Card>

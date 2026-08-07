@@ -17,7 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Reindex AI",
   description:
-    "Editor dokumen berbasis AI untuk skripsi, tesis, dan paper — dengan sitasi yang bisa diverifikasi.",
+    "AI-powered document editor for theses, dissertations, and papers — with verifiable citations.",
+  icons: {
+    icon: "/reindex-logo.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

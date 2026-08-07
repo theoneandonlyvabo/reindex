@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   GoogleAuthProvider,
@@ -23,7 +24,7 @@ import {
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
-  return "Terjadi kesalahan. Coba lagi.";
+  return "Something went wrong. Please try again.";
 }
 
 export default function SignInPage() {
@@ -69,9 +70,17 @@ export default function SignInPage() {
     <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-6 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Masuk ke Reindex AI</CardTitle>
+          <Image
+            src="/reindex-logo.png"
+            alt="Reindex AI"
+            width={40}
+            height={40}
+            className="mb-2 size-10"
+            unoptimized
+          />
+          <CardTitle>Sign in to Reindex AI</CardTitle>
           <CardDescription>
-            Lanjutkan menulis draf skripsi, tesis, atau paper Anda.
+            Continue writing your thesis, dissertation, or paper.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -81,12 +90,12 @@ export default function SignInPage() {
             onClick={handleGoogleSignIn}
             disabled={isBusy}
           >
-            Lanjutkan dengan Google
+            Continue with Google
           </Button>
 
           <div className="flex items-center gap-3">
             <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">atau</span>
+            <span className="text-xs text-muted-foreground">or</span>
             <Separator className="flex-1" />
           </div>
 
@@ -103,7 +112,7 @@ export default function SignInPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Kata sandi</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -120,7 +129,7 @@ export default function SignInPage() {
             ) : null}
 
             <Button type="submit" className="w-full" disabled={isBusy}>
-              {mode === "sign-up" ? "Buat akun" : "Masuk"}
+              {mode === "sign-up" ? "Create account" : "Sign in"}
             </Button>
           </form>
 
@@ -133,8 +142,8 @@ export default function SignInPage() {
             disabled={isBusy}
           >
             {mode === "sign-in"
-              ? "Belum punya akun? Daftar"
-              : "Sudah punya akun? Masuk"}
+              ? "Don't have an account? Sign up"
+              : "Already have an account? Sign in"}
           </button>
         </CardContent>
       </Card>

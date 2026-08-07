@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import type { Editor } from "@tiptap/react";
 import { useChat } from "@ai-sdk/react";
 import {
@@ -11,11 +12,11 @@ import {
   AlertCircle,
   ChevronRight,
   FilePlus2,
+  Frown,
   Replace,
   RotateCcw,
   Search,
   Send,
-  Sparkles,
   Type,
   User,
 } from "lucide-react";
@@ -29,19 +30,25 @@ import {
 } from "@/lib/editor/apply-edit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ChatMarkdown } from "./chat-markdown";
 
 type SearchWebOutput = {
   answer: string;
   sources: { title?: string; url: string }[];
 };
 
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+});
+
 const EDIT_TOOL_META: Record<
   string,
   { label: string; icon: typeof FilePlus2 }
 > = {
-  "tool-insert_text": { label: "Menyisipkan teks", icon: FilePlus2 },
-  "tool-replace_text": { label: "Mengganti teks", icon: Replace },
-  "tool-format_text": { label: "Mengubah format", icon: Type },
+  "tool-insert_text": { label: "Inserting text", icon: FilePlus2 },
+  "tool-replace_text": { label: "Replacing text", icon: Replace },
+  "tool-format_text": { label: "Changing format", icon: Type },
 };
 
 export function AiSidebar({
@@ -52,6 +59,11 @@ export function AiSidebar({
   documentTitle: string;
 }) {
   const [input, setInput] = useState("");
+  // Timestamp per user message, captured at send time (in the event
+  // handler — Date.now() there is fine; it's render/effect bodies that
+  // must stay pure). Keyed by send order since the SDK assigns message ids
+  // asynchronously, after this handler returns.
+  const [userTimestamps, setUserTimestamps] = useState<number[]>([]);
 
   // `body` as a FUNCTION (not a static object) is required: useChat's
   // automatic resubmit after a client-executed tool result does not carry
@@ -93,7 +105,7 @@ export function AiSidebar({
             tool: toolCall.toolName,
             toolCallId: toolCall.toolCallId,
             state: "output-error",
-            errorText: "Editor belum siap.",
+            errorText: "Editor isn't ready yet.",
           });
           return;
         }
@@ -142,6 +154,7 @@ export function AiSidebar({
     e.preventDefault();
     const text = input.trim();
     if (!text) return;
+    setUserTimestamps((prev) => [...prev, Date.now()]);
     void sendMessage({ text });
     setInput("");
   }
@@ -149,40 +162,58 @@ export function AiSidebar({
   const isBusy = status === "streaming" || status === "submitted";
   const lastMessage = messages[messages.length - 1];
   const isThinking = isBusy && (!lastMessage || lastMessage.role === "user");
+  let userMessageIndex = -1;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 space-y-5 overflow-y-auto px-4 py-3">
+      <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
         {messages.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Tanyakan sesuatu, minta riset bersitasi, atau minta Reindex Agent
-            mengedit dokumen ini langsung.
+            Ask something, request cited research, or have Reindex Agent edit
+            this document directly.
           </p>
         ) : (
-          messages.map((message) =>
-            message.role === "user" ? (
-              <div key={message.id} className="flex justify-end gap-2 pl-6">
-                <div className="max-w-[85%] space-y-1 rounded-2xl rounded-tr-sm bg-muted px-3 py-1.5">
-                  {message.parts.map((part, i) =>
-                    part.type === "text" ? (
-                      <p key={i} className="text-sm">
-                        {part.text}
-                      </p>
-                    ) : null,
-                  )}
+          messages.map((message) => {
+            if (message.role === "user") userMessageIndex += 1;
+            const userTimestamp = userTimestamps[userMessageIndex];
+            return message.role === "user" ? (
+              <div
+                key={message.id}
+                className="flex flex-col items-end gap-1 pl-6"
+              >
+                <div className="flex justify-end gap-2">
+                  <div className="max-w-[85%] space-y-1 rounded-2xl rounded-tr-sm bg-muted px-3 py-1.5">
+                    {message.parts.map((part, i) =>
+                      part.type === "text" ? (
+                        <p key={i} className="text-sm">
+                          {part.text}
+                        </p>
+                      ) : null,
+                    )}
+                  </div>
+                  <User className="mt-1 size-4 shrink-0 text-muted-foreground" />
                 </div>
-                <User className="mt-1 size-4 shrink-0 text-muted-foreground" />
+                <span className="pr-6 text-[0.65rem] text-muted-foreground">
+                  {userTimestamp ? timeFormatter.format(userTimestamp) : ""}
+                </span>
               </div>
             ) : (
               <div key={message.id} className="flex items-start gap-2">
-                <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+                <Image
+                  src="/reindex-logo.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="mt-0.5 size-4 shrink-0"
+                  unoptimized
+                />
                 <div className="min-w-0 flex-1 space-y-1.5">
                   {message.parts.map((part, i) => {
                     if (part.type === "text") {
                       return (
-                        <p key={i} className="text-sm">
-                          {part.text}
-                        </p>
+                        <div key={i} className="text-sm">
+                          <ChatMarkdown text={part.text} />
+                        </div>
                       );
                     }
 
@@ -242,10 +273,11 @@ export function AiSidebar({
                             <summary className="flex cursor-pointer list-none items-center gap-1.5 px-2.5 py-1.5 text-muted-foreground marker:content-none [&::-webkit-details-marker]:hidden">
                               <ChevronRight className="size-3.5 shrink-0 transition-transform group-open:rotate-90" />
                               <Search className="size-3.5 shrink-0" />
-                              Meneliti web · {output.sources.length} sumber
+                              Researched the web · {output.sources.length}{" "}
+                              sources
                             </summary>
                             <div className="space-y-1.5 border-t px-2.5 py-2">
-                              <p>{output.answer}</p>
+                              <ChatMarkdown text={output.answer} />
                               {output.sources.length > 0 ? (
                                 <ul className="space-y-0.5">
                                   {output.sources.map((source, si) => (
@@ -272,7 +304,7 @@ export function AiSidebar({
                           className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground"
                         >
                           <Search className="size-3.5 shrink-0 animate-pulse" />
-                          Mencari sumber...
+                          Searching the web...
                         </div>
                       );
                     }
@@ -281,46 +313,55 @@ export function AiSidebar({
                   })}
                 </div>
               </div>
-            ),
-          )
+            );
+          })
         )}
 
         {isThinking ? (
           <div className="flex items-center gap-2 pl-6">
-            <Sparkles className="size-4 shrink-0 animate-pulse text-primary" />
+            <Image
+              src="/reindex-logo.png"
+              alt=""
+              width={16}
+              height={16}
+              className="size-4 shrink-0 animate-pulse"
+              unoptimized
+            />
             <span className="animate-pulse text-xs text-muted-foreground">
-              Reindex Agent sedang berpikir...
+              Reindex Agent is thinking...
             </span>
           </div>
         ) : null}
 
         {status === "error" ? (
-          <div className="flex items-start gap-2 rounded-md border border-destructive/50 px-2.5 py-2 text-xs text-destructive">
-            <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
-            <div className="flex-1 space-y-1.5">
-              <p>{error?.message || "Permintaan gagal. Coba lagi."}</p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => regenerate()}
-              >
-                <RotateCcw />
-                Coba lagi
-              </Button>
-            </div>
+          <div className="flex flex-col items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-6 text-center">
+            <Frown className="size-8 text-destructive/70" />
+            <p className="text-sm font-medium">Something went wrong</p>
+            <p className="max-w-[90%] text-xs text-muted-foreground">
+              {error?.message || "The request failed. Please try again."}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-1"
+              onClick={() => regenerate()}
+            >
+              <RotateCcw />
+              Try again
+            </Button>
           </div>
         ) : null}
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="no-print flex items-center gap-2 border-t p-3"
+        className="no-print flex items-center gap-2 border-t p-4"
       >
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Tanya atau minta edit..."
+          placeholder="Ask or request an edit..."
           disabled={isBusy}
         />
         <Button type="submit" size="icon-sm" disabled={!input.trim() || isBusy}>

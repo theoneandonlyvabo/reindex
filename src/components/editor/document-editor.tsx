@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { EditorContent, type Editor } from "@tiptap/react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Toolbar } from "./toolbar";
@@ -18,12 +20,22 @@ export function DocumentEditor({
 }) {
   return (
     <div className="flex h-full flex-col">
-      <div className="no-print border-b px-4 py-2">
+      <div className="no-print flex items-center gap-2 border-b px-4 py-2">
+        <Link href="/" className="shrink-0" aria-label="Back to home">
+          <Image
+            src="/reindex-logo.png"
+            alt=""
+            width={24}
+            height={24}
+            className="size-6"
+            unoptimized
+          />
+        </Link>
         <Input
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          className="w-fit min-w-48 border border-transparent px-2 text-2xl font-medium shadow-none hover:border-input focus-visible:border-input focus-visible:ring-0"
-          placeholder="Judul draf"
+          className="min-w-48 max-w-full border border-transparent px-2 text-2xl font-medium shadow-none [field-sizing:content] hover:border-input focus-visible:border-input focus-visible:ring-0"
+          placeholder="Draft title"
         />
       </div>
       <Toolbar editor={editor} documentId={documentId} />

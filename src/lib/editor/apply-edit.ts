@@ -30,7 +30,7 @@ export function applyInsertText(
 
   return {
     ok: true,
-    message: `Menyisipkan paragraf baru di ${at === "end" ? "akhir dokumen" : "posisi kursor"}.`,
+    message: `Inserted a new paragraph at the ${at === "end" ? "end of the document" : "cursor position"}.`,
   };
 }
 
@@ -46,12 +46,12 @@ export function applyReplaceText(
   if (!range) {
     return {
       ok: false,
-      error: `Teks tidak ditemukan (harus verbatim, tidak boleh melewati batas paragraf): "${input.find.slice(0, 80)}"`,
+      error: `Text not found (must be verbatim, cannot cross a paragraph boundary): "${input.find.slice(0, 80)}"`,
     };
   }
   editor.chain().focus().insertContentAt(range, input.replace).run();
   editor.commands.flashRange(range.from, range.from + input.replace.length);
-  return { ok: true, message: "Teks berhasil diganti." };
+  return { ok: true, message: "Text replaced." };
 }
 
 export function applyFormatText(
@@ -66,7 +66,7 @@ export function applyFormatText(
   if (!range) {
     return {
       ok: false,
-      error: `Teks tidak ditemukan (harus verbatim, tidak boleh melewati batas paragraf): "${input.find.slice(0, 80)}"`,
+      error: `Text not found (must be verbatim, cannot cross a paragraph boundary): "${input.find.slice(0, 80)}"`,
     };
   }
 
@@ -90,5 +90,5 @@ export function applyFormatText(
   }
   editor.commands.flashRange(range.from, range.to);
 
-  return { ok: true, message: `Format ${input.format} diterapkan.` };
+  return { ok: true, message: `Applied ${input.format} formatting.` };
 }

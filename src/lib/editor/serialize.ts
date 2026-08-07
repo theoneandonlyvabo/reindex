@@ -28,5 +28,5 @@ export function serializeDoc(doc: PMNode, limit = DEFAULT_LIMIT): string {
   if (full.length <= limit) return full;
 
   const half = Math.floor(limit / 2);
-  return `${full.slice(0, half)}\n\n[... bagian tengah dipotong ...]\n\n${full.slice(-half)}`;
+  return `${full.slice(0, half)}\n\n[... middle truncated ...]\n\n${full.slice(-half)}`;
 }

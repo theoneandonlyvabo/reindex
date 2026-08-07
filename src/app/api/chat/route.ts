@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     if (rate.reason === "unauthenticated") {
       return new Response("Unauthorized", { status: 401 });
     }
-    return new Response("Terlalu banyak permintaan, coba lagi sebentar.", {
+    return new Response("Too many requests, please try again shortly.", {
       status: 429,
     });
   }
@@ -52,15 +52,15 @@ export async function POST(req: Request) {
       // against the live TipTap editor instance.
       insert_text: tool({
         description:
-          "Menyisipkan SATU paragraf baru ke dalam dokumen (selalu jadi block paragraf sendiri, mewarisi format dokumen). Untuk menambah/mengubah teks di TENGAH paragraf yang sudah ada, gunakan replace_text — jangan gunakan insert_text untuk itu.",
+          "Inserts ONE new paragraph into the document (always its own paragraph block, inheriting the document's formatting). To add/change text in the MIDDLE of an existing paragraph, use replace_text instead — do not use insert_text for that.",
         inputSchema: z.object({
-          text: z.string().describe("Teks polos untuk satu paragraf, tanpa markdown."),
+          text: z.string().describe("Plain text for one paragraph, no markdown."),
           at: z.enum(["cursor", "end"]).default("end"),
         }),
       }),
       replace_text: tool({
         description:
-          "Mengganti bagian teks yang sudah ada, atau menyisipkan teks di tengah paragraf (jadikan `replace` gabungan teks lama + teks baru). `find` HARUS disalin verbatim dari dokumen dan TIDAK BOLEH melewati batas paragraf.",
+          "Replaces existing text, or inserts text mid-paragraph (make `replace` the old text plus the new text combined). `find` MUST be copied verbatim from the document and MUST NOT cross a paragraph boundary.",
         inputSchema: z.object({
           find: z.string().min(3),
           replace: z.string(),
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
         }),
       }),
       format_text: tool({
-        description: "Menerapkan format ke bagian teks verbatim yang sudah ada.",
+        description: "Applies formatting to an existing verbatim span of text.",
         inputSchema: z.object({
           find: z.string().min(3),
           format: z.enum(["bold", "italic", "strike", "underline", "heading"]),
@@ -79,12 +79,12 @@ export async function POST(req: Request) {
       // Server-executed: runs here, result goes straight back to the model.
       search_web: tool({
         description:
-          "Mencari sumber di web untuk sitasi bersumber. Gunakan sebelum membuat klaim faktual atau sitasi apapun.",
+          "Searches the web for citable sources. Use this before making any factual claim or citation.",
         inputSchema: z.object({ query: z.string() }),
         execute: async ({ query }) => {
           const { text, sources } = await generateText({
             model: perplexity("sonar"),
-            prompt: `Pertanyaan riset: ${query}\nJawab secara ringkas dan sertakan sumber.`,
+            prompt: `Research question: ${query}\nAnswer concisely and include sources.`,
           });
           return {
             answer: text,

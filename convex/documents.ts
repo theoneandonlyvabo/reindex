@@ -35,7 +35,7 @@ export const create = mutation({
     const user = await requireUser(ctx);
     return await ctx.db.insert("documents", {
       ownerId: user._id,
-      title: args.title ?? "Draf tanpa judul",
+      title: args.title ?? "Untitled draft",
       content: EMPTY_DOC,
       updatedAt: Date.now(),
     });

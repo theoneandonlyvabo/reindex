@@ -44,7 +44,7 @@ export function useDocumentEditor(doc: Doc<"documents">) {
       Link.configure({ openOnClick: false }),
       Image,
       Placeholder.configure({
-        placeholder: "Mulai menulis draf skripsi Anda...",
+        placeholder: "Start writing your thesis draft...",
       }),
       FlashHighlight,
     ],

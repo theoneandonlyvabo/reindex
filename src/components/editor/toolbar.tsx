@@ -71,7 +71,7 @@ export function Toolbar({
     const previousUrl = editor!.getAttributes("link").href as
       | string
       | undefined;
-    const url = window.prompt("URL tautan:", previousUrl ?? "");
+    const url = window.prompt("Link URL:", previousUrl ?? "");
     if (url === null) return;
     if (url === "") {
       editor!.chain().focus().extendMarkRange("link").unsetLink().run();
@@ -246,7 +246,7 @@ export function Toolbar({
 
       <Button variant="outline" size="sm" onClick={() => window.print()}>
         <Printer />
-        Ekspor PDF
+        Export PDF
       </Button>
     </div>
   );

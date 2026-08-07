@@ -11,6 +11,9 @@
   line-height: 1.5;
   text-align: justify;
   counter-reset: academic-chapter;
+  /* Pure neutral black, deliberately NOT the app's warm --foreground —
+   * the paper stays paper regardless of the chrome's theme. */
+  color: oklch(0.145 0 0);
 }
 
 .academic-doc h1 {
@@ -71,8 +74,10 @@
   max-width: 100%;
   min-height: 29.7cm;
   padding: 2.54cm;
-  background: var(--card);
-  border: 1px solid var(--border);
+  /* Pure neutral, deliberately NOT var(--card) — the paper is exempt from
+   * the app's warm theme regardless of light/dark mode. */
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.9 0 0);
   border-radius: 2px;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06);
 }

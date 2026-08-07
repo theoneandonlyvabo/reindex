@@ -166,3 +166,10 @@
   border-radius: 2px;
   animation: ai-flash-fade 1.8s ease-out forwards;
 }
+
+/* Pins the selected-text-edit toolbar's range visibly, independent of DOM
+ * focus — the native selection dims as soon as focus leaves the editor. */
+.ai-pending-selection {
+  border-radius: 2px;
+  background-color: color-mix(in oklch, var(--primary), transparent 80%);
+}

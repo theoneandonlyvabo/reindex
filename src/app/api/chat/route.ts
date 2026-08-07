@@ -11,6 +11,7 @@ import {
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/ai/rate-limit";
 import { agentSystemPrompt } from "@/lib/ai/prompts";
+import { describeAiError } from "@/lib/ai/error-message";
 
 // Multi-step tool loops + retries against a model that's shown transient
 // "high demand" errors can legitimately take 10-15s per step.
@@ -100,5 +101,9 @@ export async function POST(req: Request) {
     },
   });
 
-  return result.toUIMessageStreamResponse();
+  // Without this, the SDK masks every stream error as the generic "An error
+  // occurred." (default behavior, to avoid leaking internals) — which is
+  // indistinguishable from an actual code bug. Surface the real reason
+  // (e.g. provider rate limit) instead.
+  return result.toUIMessageStreamResponse({ onError: describeAiError });
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { EditorContent, type Editor } from "@tiptap/react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Toolbar } from "./toolbar";
+import { SelectionToolbar } from "./selection-toolbar";
 import { Input } from "@/components/ui/input";
 
 export function DocumentEditor({
@@ -40,6 +41,7 @@ export function DocumentEditor({
       </div>
       <Toolbar editor={editor} documentId={documentId} />
       <div className="doc-canvas min-h-0 flex-1 overflow-auto bg-muted px-6 py-8">
+        <SelectionToolbar editor={editor} />
         <EditorContent
           editor={editor}
           className="academic-doc doc-paper mx-auto"

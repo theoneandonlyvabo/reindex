@@ -13,6 +13,7 @@ import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { useDebouncedCallback } from "./use-debounced-callback";
 import { FlashHighlight } from "@/components/editor/extensions/flash-highlight";
+import { PendingSelection } from "@/components/editor/extensions/pending-selection";
 
 const AUTOSAVE_DELAY_MS = 1000;
 
@@ -47,6 +48,7 @@ export function useDocumentEditor(doc: Doc<"documents">) {
         placeholder: "Start writing your thesis draft...",
       }),
       FlashHighlight,
+      PendingSelection,
     ],
     content: doc.content,
     onUpdate: ({ editor }) => {

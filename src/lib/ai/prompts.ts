@@ -30,3 +30,12 @@ export function agentSystemPrompt({
     selection ? `\n<selection>\n${selection}\n</selection>` : "",
   ].join("\n");
 }
+
+export function rewriteSystemPrompt(): string {
+  return [
+    "You are Reindex Agent, an academic writing assistant for students and researchers.",
+    "The user selected a span of text in their document and gave an instruction for how to rewrite it.",
+    "Rewrite ONLY the selected text per the instruction. Reply with ONLY the replacement text — no preamble, no quotes, no markdown, no explanation.",
+    "Match the register and language of the original text (Indonesian or English).",
+  ].join("\n");
+}

@@ -4,6 +4,28 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 19:05
+> "[Image #1] problem" (sidebar chat: "Something went wrong. An error occurred." after a `search_web` call) + "[Image #2] ini jg" (rewrite toolbar: "The AI request failed. Please try again.") + "fitur ini kalo misal kita abis select text kemudian pindah fokus ke prompt box nya, selectionnya ilang, we dont want that, bikin supaya terus ada selama ai ngeprompt even ampe output ai udh masuk. also enter icon nya gausah icon ai juga, dibikin icon arrow right aja." + [browser NotFoundError: removeChild] + "the popup ai prompter is also not working"
+
+- **Fix (root cause, both error surfaces):** both bug reports traced to the same external cause — Google AI Studio's free-tier daily quota for `gemini-3.5-flash` (20 requests/day/model) exhausted from testing, confirmed via `429 RESOURCE_EXHAUSTED` in server logs. Not fixable in code, but a real bug rode along: both routes were swallowing the actual reason. `src/lib/ai/error-message.ts` (new, 9L) — `describeAiError()`, single source of truth distinguishing a 429/quota error from other failures. Wired into `app/api/chat/route.ts` (`toUIMessageStreamResponse({ onError: describeAiError })` — the AI SDK masks stream errors as generic "An error occurred." by default) and `app/api/rewrite/route.ts` (previously had zero error handling around `generateText`, so a provider failure became an opaque Next.js 500 — now caught, mapped to 429 or 502 with a real message). `selection-toolbar.tsx` updated to render the server's actual response text instead of a hardcoded string
+- **New:** `src/components/editor/extensions/pending-selection.ts` (79L) — the native browser text-selection highlight dims/disappears the instant focus leaves the editor's contenteditable (e.g. clicking into the toolbar's instruction input, which also has `autoFocus`), so the requested "keep selection visible through the whole AI request" needed a focus-independent marker. Same ProseMirror-decoration pattern as the existing `FlashHighlight` extension: pinned on `Input`'s `onFocus`, cleared once the request settles. CSS in `globals.css` (`.ai-pending-selection`)
+- **Fix (root cause):** the first version cleared the pin via an `editor.on("selectionUpdate", ...)` listener calling `editor.commands.clearPendingSelection()` — dispatching a new ProseMirror transaction from inside another transaction's own dispatch cycle. That re-entrant `view.dispatch()` is very likely what caused the `Uncaught NotFoundError: Failed to execute 'removeChild'` crash (tiptap's `BubbleMenu` detaches its DOM node into a tippy popper outside React's tree; a corrupted update cycle leaves React holding a stale reference) and the toolbar becoming non-functional afterward. Moved the auto-clear into the decoration plugin's own `apply(tr, value)` (`tr.selectionSet && tr.selection.empty → null`) — clears as part of the *same* transaction instead of a second one; the `useEffect`/listener in `selection-toolbar.tsx` was deleted entirely, not patched
+- **Adjust:** `selection-toolbar.tsx` — submit button icon `Sparkles` → `ArrowRight` (kept `Sparkles` as the decorative left-side indicator; only the send/submit affordance changed, per "enter icon nya gausah icon ai juga")
+- Verified: `tsc --noEmit` and `eslint` clean on all touched files. `next build` not re-run this turn (prior attempt was interrupted by the user mid-investigation) — worth a final build check before calling this settled
+
+---
+
+### 18:20
+> "continue last plan from phase 3"
+
+- **New:** `src/app/api/rewrite/route.ts` (39L) — Phase 3 (selected-text edit): non-streaming Gemini call taking `{ selectedText, instruction }`, returns `{ text }`. Same bearer-token + `checkRateLimit(token, "rewrite")` gate as `/api/chat` (the `rewrite` bucket was already provisioned in `convex/rateLimit.ts` back in Phase 2, unused until now)
+- **New:** `src/components/editor/selection-toolbar.tsx` (99L) — floating instruction toolbar via TipTap's `BubbleMenu` (`shouldShow: !state.selection.empty`), shown on any non-empty text selection. Captures `{ from, to }` at submit time (not read live) so the applied range can't drift if the selection changes while the request is in flight. Applies the result as a single `insertContentAt({from, to}, replacement)` transaction — one Ctrl+Z undoes it
+- **Adjust:** `src/lib/ai/prompts.ts` — added `rewriteSystemPrompt()` (plain-text-only replacement, matches source language/register)
+- **Adjust:** `src/components/editor/document-editor.tsx` — mounted `<SelectionToolbar editor={editor} />` next to `EditorContent`
+- Verified: `tsc --noEmit` and `next build` both clean, `/api/rewrite` registered as a dynamic route, correctly rejects unauthenticated `POST` with 401 against the running dev server. No Chrome extension connected this session, so the full signed-in click-through (select text → instruction → replacement applied) was not exercised in-browser — flagging this rather than claiming it, since it's the one thing build/typecheck can't confirm
+
+---
+
 ### 17:50
 > "logo reindexnya centered, 'Google OAUTH' button tambahin logo google nya, bikin tombol show password" + "add '+' icon on New Draft, Sign out should just be an icon no text." + "dashboard reindex should look like this, tapi sesuain ke color palette dan style design current, ambil komposisi dan komponen dari screenshot gw aja" (Google Docs homepage reference) + "section ini boxnya dibikin 1:1.75 aja potrait jgn landscape"
 

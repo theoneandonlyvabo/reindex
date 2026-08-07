@@ -17,6 +17,29 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 13:24
+> "[Image #6] not working at all, debug first and report to me"
+
+- **Fix:** `src/app/api/chat/route.ts` — sidebar sent messages but never responded; server logs showed `AI_APICallError: This model models/gemini-2.5-flash is no longer available to new users`. Verified against the live API (not just the models-list endpoint, which still lists it) that this key can't call it, tested working alternatives, switched to `gemini-3.5-flash` (stable, non-preview, confirmed working). Also confirmed Perplexity's `sonar` (used by `search_web`, not yet exercised) still works — no change needed there.
+
+---
+
+### 01:38
+> "okay continue for now"
+
+- **New:** `convex/rateLimit.ts` (26L) — `@convex-dev/rate-limiter` token-bucket limits for `chat`/`rewrite`/`complete` (only `chat` used this phase; the other two are ready for Phase 3/4), keyed by authenticated user
+- **New:** `src/lib/ai/rate-limit.ts` (37L) — Next.js-side `checkRateLimit`, calls the Convex mutation via `ConvexHttpClient.setAuth(idToken)` so Convex verifies the Firebase token itself (same trust as the client SDK) rather than duplicating JWT verification in Next.js
+- **New:** `src/lib/editor/{text-index,serialize,apply-edit}.ts` (61L/32L/77L) — PM-doc↔plain-text mapping so AI tools address content by verbatim substring, doc→markdown-ish serialization for model context, and tool-input→TipTap-command application (`insert_text`/`replace_text`/`format_text`)
+- **New:** `src/lib/ai/prompts.ts` (32L) — sidebar agent system prompt (verbatim-find rule, cite-before-claiming rule)
+- **New:** `src/app/api/chat/route.ts` (101L) — Gemini Flash via `streamText`, 3 client-executed edit tools (no `execute`, handled by the sidebar's `onToolCall`) + 1 server-executed `search_web` tool (Perplexity Sonar via `@ai-sdk/perplexity`)
+- **New:** `src/components/editor/ai-sidebar.tsx` (270L) — chat UI, `useChat` + `onToolCall`/`addToolOutput`, renders tool-call chips and citation links
+- **New:** `src/hooks/use-document-editor.ts` (61L), `src/components/editor/document-workspace.tsx` (52L) — lifted the TipTap `editor` instance out of `document-editor.tsx` (now purely presentational, 38L) so the sidebar (and Phase 3/4 later) share the same live instance instead of each wiring its own
+- **Fix:** `src/lib/ai/rate-limit.ts`, `src/app/api/chat/route.ts` — an invalid/expired bearer token was an uncaught throw → hard 500; now caught and returned as a clean 401 (found via smoke test with a bogus token)
+- **Fix:** `src/hooks/use-debounced-callback.ts` — `ref.current` was written directly during render, which `eslint-plugin-react-hooks`' new `react-hooks/refs` rule (relevant given `reactCompiler: true`) flags as a hard error; moved into a bare `useEffect`
+- **Adjust:** `convex/auth.config.ts` — anonymous default export → named `authConfig` (lint warning cleanup, no behavior change)
+
+---
+
 ### 00:53
 > "QC lagi, (1) sidebar agent harusnya GAK BISA DISCROLL (currently msh bs discroll), (2) Cursor in page HARUSNYA GAK BERADA DALEM BOX (liat gambar [Image #4], harusnya kyk [Image #5] *lgsg cursor, bukan ada box boundary nya dulu*), (3) UI wise, bikin lebih modern-tech vibe (cursor, antigravity, claude, paham kan?) bikinin design instruction file under .design/ui/(bikin .md file baru disini, isinya jelasin arah visual design ui yg gw mau). (4) H1, H2, H3 button harusnya dropdown, dan ada state 'Normal Text'. (5) ketika scorlling, yang bergerak HANYA PAPER PAGE NYA, tidak yang lain (ngaruh ke poin pertama, top toolbar jg seharusnya gak scrollable). (6) 'Asisten AI' ubah jadi Reindex Agent. (7) Judul dokumen dibuat lebih besar, dan hover state nya buatin border untuk contain si judul ini. (8) ubah semua interactable / hoverable component munculin cursor jari."
 

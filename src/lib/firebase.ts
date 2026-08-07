@@ -16,3 +16,10 @@ export const firebaseApp = getApps().length
   : initializeApp(firebaseConfig);
 
 export const firebaseAuth = getAuth(firebaseApp);
+
+/** Fresh ID token for the current user, for authenticating Next.js AI routes. */
+export async function getIdToken(): Promise<string> {
+  const user = firebaseAuth.currentUser;
+  if (!user) throw new Error("Not signed in");
+  return await user.getIdToken();
+}

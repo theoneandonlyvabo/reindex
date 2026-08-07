@@ -11,6 +11,7 @@
 import type * as documentFiles from "../documentFiles.js";
 import type * as documents from "../documents.js";
 import type * as model_auth from "../model/auth.js";
+import type * as rateLimit from "../rateLimit.js";
 import type * as users from "../users.js";
 
 import type {
@@ -23,6 +24,7 @@ declare const fullApi: ApiFromModules<{
   documentFiles: typeof documentFiles;
   documents: typeof documents;
   "model/auth": typeof model_auth;
+  rateLimit: typeof rateLimit;
   users: typeof users;
 }>;
 

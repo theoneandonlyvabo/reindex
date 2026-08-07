@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import {
@@ -11,6 +10,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { firebaseAuth } from "@/lib/firebase";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,14 +72,7 @@ export default function SignInPage() {
     <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-6 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader className="justify-items-center text-center">
-          <Image
-            src="/reindex-logo.png"
-            alt="Reindex AI"
-            width={40}
-            height={40}
-            className="mb-2 size-10"
-            unoptimized
-          />
+          <Logo size={40} className="mb-2 size-10" />
           <CardTitle>Sign in to Reindex AI</CardTitle>
           <CardDescription>
             Continue writing your thesis, dissertation, or paper.

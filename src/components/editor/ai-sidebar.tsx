@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import type { Editor } from "@tiptap/react";
 import { useChat } from "@ai-sdk/react";
 import {
@@ -22,6 +21,7 @@ import {
   User,
 } from "lucide-react";
 import { getIdToken } from "@/lib/firebase";
+import { Logo } from "@/components/logo";
 import { serializeDoc } from "@/lib/editor/serialize";
 import {
   applyFormatText,
@@ -245,14 +245,7 @@ export function AiSidebar({
               </div>
             ) : (
               <div key={message.id} className="flex items-start gap-2">
-                <Image
-                  src="/reindex-logo.png"
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="mt-0.5 size-4 shrink-0"
-                  unoptimized
-                />
+                <Logo size={16} alt="" className="mt-0.5 size-4 shrink-0" />
                 <div className="min-w-0 flex-1 space-y-1.5">
                   {message.parts.map((part, i) => {
                     if (part.type === "text") {
@@ -365,14 +358,7 @@ export function AiSidebar({
 
         {isThinking ? (
           <div className="flex items-center gap-2 pl-6">
-            <Image
-              src="/reindex-logo.png"
-              alt=""
-              width={16}
-              height={16}
-              className="size-4 shrink-0 animate-pulse"
-              unoptimized
-            />
+            <Logo size={16} alt="" className="size-4 shrink-0 animate-pulse" />
             <span className="animate-pulse text-xs text-muted-foreground">
               Reindex Agent is thinking...
             </span>

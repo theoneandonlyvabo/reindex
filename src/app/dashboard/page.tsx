@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { LogOut, Plus, Search, Trash2 } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { signOut } from "firebase/auth";
 import { api } from "../../../convex/_generated/api";
 import { firebaseAuth } from "@/lib/firebase";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,14 +42,7 @@ function DashboardContent() {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
       <header className="flex items-center gap-4 border-b px-6 py-3">
-        <Image
-          src="/reindex-logo.png"
-          alt="Reindex AI"
-          width={24}
-          height={24}
-          className="size-6"
-          unoptimized
-        />
+        <Logo size={24} className="size-6" />
         <span className="font-medium">Reindex AI</span>
         <div className="relative mx-auto w-full max-w-md">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -110,14 +103,7 @@ function DashboardContent() {
                   className="group flex aspect-[3/4] flex-col overflow-hidden border bg-card text-left transition-colors hover:bg-muted/50"
                 >
                   <div className="flex flex-1 items-center justify-center border-b bg-muted/40">
-                    <Image
-                      src="/reindex-logo.png"
-                      alt=""
-                      width={28}
-                      height={28}
-                      className="size-7 opacity-30"
-                      unoptimized
-                    />
+                    <Logo size={28} alt="" className="size-7 opacity-30" />
                   </div>
                   <div className="flex items-start justify-between gap-2 p-3">
                     <div className="min-w-0">

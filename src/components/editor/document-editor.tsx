@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { EditorContent, type Editor } from "@tiptap/react";
 import { PanelLeftOpen } from "lucide-react";
@@ -9,6 +8,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { Toolbar } from "./toolbar";
 import { SelectionToolbar } from "./selection-toolbar";
 import { DocumentOutline } from "./document-outline";
+import { Logo } from "@/components/logo";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -30,14 +30,7 @@ export function DocumentEditor({
     <div className="flex h-full flex-col">
       <div className="no-print flex h-12 items-center gap-2 border-b px-4 py-2">
         <Link href="/" className="shrink-0" aria-label="Back to home">
-          <Image
-            src="/reindex-logo.png"
-            alt=""
-            width={24}
-            height={24}
-            className="size-6"
-            unoptimized
-          />
+          <Logo size={24} alt="" className="size-6" />
         </Link>
         <Input
           value={title}

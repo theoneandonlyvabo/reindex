@@ -4,6 +4,20 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-08
 
+### 01:37
+> "run BACKLOG.md and ask me all he questions needed."
+
+Replaced the bare `/` splash (logo + tagline + one button) with a full onboarding/landing page per `BACKLOG.md`'s five-section spec, grounded in `MASTER_PROMPT.md` > "Kenapa produk ini dibuat" (ChatGPT-thesis copy-paste loop, fabricated citations):
+
+- **New:** `src/components/logo.tsx` — extracted the `<Image src="/reindex-logo.png">` block duplicated across 7 call sites into one component
+- **New:** `src/components/marketing/` — `reveal.tsx` (scroll-reveal via `motion/react`, `whileInView`), `site-header.tsx` (sticky), `site-footer.tsx`, `start-writing-button.tsx` (auth-aware CTA via `useConvexAuth`), `hero.tsx`, `problem.tsx`, `bridge.tsx`, `why.tsx`, `features.tsx`, `cta.tsx`
+- **New:** `src/components/marketing/mockups/` — 4 hand-built CSS mockups (editor heading/paper via `.academic-doc`, agent chat bubble + citation chip, selected-text-edit highlight + floating toolbar via `.ai-pending-selection`, autocomplete ghost text via `.ai-ghost-text`) illustrating the four core features without screenshots
+- **Adjust:** `src/app/page.tsx` (30 → composition root), `src/app/dashboard/page.tsx`, `src/app/sign-in/page.tsx`, `src/components/editor/document-editor.tsx`, `src/components/editor/ai-sidebar.tsx` — swapped inline `<Image>` logo blocks for `<Logo>`
+- **New:** `motion` (^13.0.0) dependency for scroll-triggered reveal animation, wrapped in `<MotionConfig reducedMotion="user">` for `prefers-reduced-motion` support
+- Verified: `tsc --noEmit`, `eslint`, `next build` all clean; dev server SSR output checked structurally (sticky header, all 4 feature mockups, footer credit, auth-aware CTA default state) — no Chrome extension available this session for a live visual/interactive check, so responsive breakpoints and scroll-reveal timing are unverified in-browser
+
+---
+
 ### 02:00
 > "[Image #17] IT WORKED. is there a phase 5?"
 

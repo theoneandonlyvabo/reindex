@@ -12,6 +12,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { useDebouncedCallback } from "./use-debounced-callback";
+import { FlashHighlight } from "@/components/editor/extensions/flash-highlight";
 
 const AUTOSAVE_DELAY_MS = 1000;
 
@@ -45,6 +46,7 @@ export function useDocumentEditor(doc: Doc<"documents">) {
       Placeholder.configure({
         placeholder: "Mulai menulis draf skripsi Anda...",
       }),
+      FlashHighlight,
     ],
     content: doc.content,
     onUpdate: ({ editor }) => {

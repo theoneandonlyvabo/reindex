@@ -140,3 +140,19 @@
     cursor: pointer;
   }
 }
+
+/* Briefly highlights a range right after an AI tool edits it, so it's clear
+ * where the change landed — not a full diff/review UI, just a locator. */
+@keyframes ai-flash-fade {
+  from {
+    background-color: color-mix(in oklch, var(--primary), transparent 70%);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.ai-flash {
+  border-radius: 2px;
+  animation: ai-flash-fade 1.8s ease-out forwards;
+}

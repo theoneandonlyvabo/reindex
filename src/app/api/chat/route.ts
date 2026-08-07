@@ -51,15 +51,16 @@ export async function POST(req: Request) {
       // Client-executed: no `execute`, handled by the sidebar's onToolCall
       // against the live TipTap editor instance.
       insert_text: tool({
-        description: "Menyisipkan teks baru ke dalam dokumen.",
+        description:
+          "Menyisipkan SATU paragraf baru ke dalam dokumen (selalu jadi block paragraf sendiri, mewarisi format dokumen). Untuk menambah/mengubah teks di TENGAH paragraf yang sudah ada, gunakan replace_text — jangan gunakan insert_text untuk itu.",
         inputSchema: z.object({
-          text: z.string().describe("Teks polos, tanpa markdown."),
+          text: z.string().describe("Teks polos untuk satu paragraf, tanpa markdown."),
           at: z.enum(["cursor", "end"]).default("end"),
         }),
       }),
       replace_text: tool({
         description:
-          "Mengganti bagian teks yang sudah ada. `find` HARUS disalin verbatim dari dokumen dan TIDAK BOLEH melewati batas paragraf.",
+          "Mengganti bagian teks yang sudah ada, atau menyisipkan teks di tengah paragraf (jadikan `replace` gabungan teks lama + teks baru). `find` HARUS disalin verbatim dari dokumen dan TIDAK BOLEH melewati batas paragraf.",
         inputSchema: z.object({
           find: z.string().min(3),
           replace: z.string(),

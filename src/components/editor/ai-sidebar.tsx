@@ -35,7 +35,10 @@ type SearchWebOutput = {
   sources: { title?: string; url: string }[];
 };
 
-const EDIT_TOOL_META: Record<string, { label: string; icon: typeof FilePlus2 }> = {
+const EDIT_TOOL_META: Record<
+  string,
+  { label: string; icon: typeof FilePlus2 }
+> = {
   "tool-insert_text": { label: "Menyisipkan teks", icon: FilePlus2 },
   "tool-replace_text": { label: "Mengganti teks", icon: Replace },
   "tool-format_text": { label: "Mengubah format", icon: Type },
@@ -118,12 +121,7 @@ export function AiSidebar({
               editor,
               toolCall.input as {
                 find: string;
-                format:
-                  | "bold"
-                  | "italic"
-                  | "strike"
-                  | "underline"
-                  | "heading";
+                format: "bold" | "italic" | "strike" | "underline" | "heading";
                 level?: 1 | 2 | 3;
               },
             );
@@ -154,133 +152,137 @@ export function AiSidebar({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-3">
+      <div className="flex-1 space-y-5 overflow-y-auto px-4 py-3">
         {messages.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Tanyakan sesuatu, minta riset bersitasi, atau minta Reindex Agent
             mengedit dokumen ini langsung.
           </p>
         ) : (
-          messages.map((message) => (
-            <div key={message.id} className="flex items-start gap-2">
-              {message.role === "user" ? (
-                <User className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-              ) : (
-                <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
-              )}
-              <div className="min-w-0 flex-1 space-y-1.5">
-                {message.parts.map((part, i) => {
-                  if (part.type === "text") {
-                    return (
-                      <p
-                        key={i}
-                        className={
-                          message.role === "user"
-                            ? "text-sm font-medium"
-                            : "text-sm"
-                        }
-                      >
+          messages.map((message) =>
+            message.role === "user" ? (
+              <div key={message.id} className="flex justify-end gap-2 pl-6">
+                <div className="max-w-[85%] space-y-1 rounded-2xl rounded-tr-sm bg-muted px-3 py-1.5">
+                  {message.parts.map((part, i) =>
+                    part.type === "text" ? (
+                      <p key={i} className="text-sm">
                         {part.text}
                       </p>
-                    );
-                  }
-
-                  if (
-                    part.type === "tool-insert_text" ||
-                    part.type === "tool-replace_text" ||
-                    part.type === "tool-format_text"
-                  ) {
-                    const meta = EDIT_TOOL_META[part.type];
-                    const Icon = meta.icon;
-                    if (part.state === "output-available") {
-                      const output = part.output as EditResult;
-                      return (
-                        <div
-                          key={i}
-                          className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs ${
-                            output.ok
-                              ? "text-muted-foreground"
-                              : "border-destructive/50 text-destructive"
-                          }`}
-                        >
-                          <Icon className="size-3.5 shrink-0" />
-                          {output.ok ? output.message : output.error}
-                        </div>
-                      );
-                    }
-                    if (part.state === "output-error") {
-                      return (
-                        <div
-                          key={i}
-                          className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-2.5 py-1.5 text-xs text-destructive"
-                        >
-                          <AlertCircle className="size-3.5 shrink-0" />
-                          {part.errorText}
-                        </div>
-                      );
-                    }
-                    return (
-                      <div
-                        key={i}
-                        className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground"
-                      >
-                        <Icon className="size-3.5 shrink-0 animate-pulse" />
-                        {meta.label}...
-                      </div>
-                    );
-                  }
-
-                  if (part.type === "tool-search_web") {
-                    if (part.state === "output-available") {
-                      const output = part.output as SearchWebOutput;
-                      return (
-                        <details
-                          key={i}
-                          className="group rounded-md border text-xs"
-                        >
-                          <summary className="flex cursor-pointer list-none items-center gap-1.5 px-2.5 py-1.5 text-muted-foreground marker:content-none [&::-webkit-details-marker]:hidden">
-                            <ChevronRight className="size-3.5 shrink-0 transition-transform group-open:rotate-90" />
-                            <Search className="size-3.5 shrink-0" />
-                            Meneliti web · {output.sources.length} sumber
-                          </summary>
-                          <div className="space-y-1.5 border-t px-2.5 py-2">
-                            <p>{output.answer}</p>
-                            {output.sources.length > 0 ? (
-                              <ul className="space-y-0.5">
-                                {output.sources.map((source, si) => (
-                                  <li key={si}>
-                                    <a
-                                      href={source.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-primary underline underline-offset-2"
-                                    >
-                                      {source.title ?? source.url}
-                                    </a>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : null}
-                          </div>
-                        </details>
-                      );
-                    }
-                    return (
-                      <div
-                        key={i}
-                        className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground"
-                      >
-                        <Search className="size-3.5 shrink-0 animate-pulse" />
-                        Mencari sumber...
-                      </div>
-                    );
-                  }
-
-                  return null;
-                })}
+                    ) : null,
+                  )}
+                </div>
+                <User className="mt-1 size-4 shrink-0 text-muted-foreground" />
               </div>
-            </div>
-          ))
+            ) : (
+              <div key={message.id} className="flex items-start gap-2">
+                <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  {message.parts.map((part, i) => {
+                    if (part.type === "text") {
+                      return (
+                        <p key={i} className="text-sm">
+                          {part.text}
+                        </p>
+                      );
+                    }
+
+                    if (
+                      part.type === "tool-insert_text" ||
+                      part.type === "tool-replace_text" ||
+                      part.type === "tool-format_text"
+                    ) {
+                      const meta = EDIT_TOOL_META[part.type];
+                      const Icon = meta.icon;
+                      if (part.state === "output-available") {
+                        const output = part.output as EditResult;
+                        return (
+                          <div
+                            key={i}
+                            className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs ${
+                              output.ok
+                                ? "text-muted-foreground"
+                                : "border-destructive/50 text-destructive"
+                            }`}
+                          >
+                            <Icon className="size-3.5 shrink-0" />
+                            {output.ok ? output.message : output.error}
+                          </div>
+                        );
+                      }
+                      if (part.state === "output-error") {
+                        return (
+                          <div
+                            key={i}
+                            className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-2.5 py-1.5 text-xs text-destructive"
+                          >
+                            <AlertCircle className="size-3.5 shrink-0" />
+                            {part.errorText}
+                          </div>
+                        );
+                      }
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground"
+                        >
+                          <Icon className="size-3.5 shrink-0 animate-pulse" />
+                          {meta.label}...
+                        </div>
+                      );
+                    }
+
+                    if (part.type === "tool-search_web") {
+                      if (part.state === "output-available") {
+                        const output = part.output as SearchWebOutput;
+                        return (
+                          <details
+                            key={i}
+                            className="group rounded-md border text-xs"
+                          >
+                            <summary className="flex cursor-pointer list-none items-center gap-1.5 px-2.5 py-1.5 text-muted-foreground marker:content-none [&::-webkit-details-marker]:hidden">
+                              <ChevronRight className="size-3.5 shrink-0 transition-transform group-open:rotate-90" />
+                              <Search className="size-3.5 shrink-0" />
+                              Meneliti web · {output.sources.length} sumber
+                            </summary>
+                            <div className="space-y-1.5 border-t px-2.5 py-2">
+                              <p>{output.answer}</p>
+                              {output.sources.length > 0 ? (
+                                <ul className="space-y-0.5">
+                                  {output.sources.map((source, si) => (
+                                    <li key={si}>
+                                      <a
+                                        href={source.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary underline underline-offset-2"
+                                      >
+                                        {source.title ?? source.url}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
+                            </div>
+                          </details>
+                        );
+                      }
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground"
+                        >
+                          <Search className="size-3.5 shrink-0 animate-pulse" />
+                          Mencari sumber...
+                        </div>
+                      );
+                    }
+
+                    return null;
+                  })}
+                </div>
+              </div>
+            ),
+          )
         )}
 
         {isThinking ? (

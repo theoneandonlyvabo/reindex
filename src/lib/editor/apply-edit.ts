@@ -10,12 +10,27 @@ export function applyInsertText(
   input: { text: string; at?: "cursor" | "end" },
 ): EditResult {
   const at = input.at ?? "end";
-  const pos =
+  const from =
     at === "end" ? editor.state.doc.content.size : editor.state.selection.from;
-  editor.chain().focus().insertContentAt(pos, input.text).run();
+
+  // Inserted as a proper paragraph node, not a raw string — a raw string
+  // insert glues onto whatever's already at that position with no paragraph
+  // boundary, losing the document's structure (and its formatting).
+  editor
+    .chain()
+    .focus()
+    .insertContentAt(from, {
+      type: "paragraph",
+      content: input.text ? [{ type: "text", text: input.text }] : [],
+    })
+    .run();
+
+  const to = editor.state.selection.from; // cursor lands right after the inserted content
+  editor.commands.flashRange(from, to);
+
   return {
     ok: true,
-    message: `Menyisipkan teks di ${at === "end" ? "akhir dokumen" : "posisi kursor"}.`,
+    message: `Menyisipkan paragraf baru di ${at === "end" ? "akhir dokumen" : "posisi kursor"}.`,
   };
 }
 
@@ -35,6 +50,7 @@ export function applyReplaceText(
     };
   }
   editor.chain().focus().insertContentAt(range, input.replace).run();
+  editor.commands.flashRange(range.from, range.from + input.replace.length);
   return { ok: true, message: "Teks berhasil diganti." };
 }
 
@@ -72,6 +88,7 @@ export function applyFormatText(
       chain.setHeading({ level: input.level ?? 2 }).run();
       break;
   }
+  editor.commands.flashRange(range.from, range.to);
 
   return { ok: true, message: `Format ${input.format} diterapkan.` };
 }

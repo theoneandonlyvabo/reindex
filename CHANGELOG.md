@@ -17,6 +17,16 @@ Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.m
 
 ## 2026-08-07
 
+### 14:16
+> "QC lagi. (1) spacing di agent sidebar masih kacau, gabisa bedain antara mana prompt user dan hasil generation ai. (2) ini pertanyaan sih, kyk penanda perubahan (diff) memang blm diimplement apa kita drop? Karena tadi pas gw prompt dia lgsg nulis aja, tanpa mikirin apapun. (3) masih ada korelasi dgn poin 2, ai agent hanya nulis text tanpa mikir indentasi, page break, dan lain-lain padahal seharusnya lebih aware."
+
+- **Fix:** `src/components/editor/ai-sidebar.tsx` — user vs agent turns were indistinguishable (same layout, same spacing for every part). User messages now render as a right-aligned bubble (icon + compact pill); agent turns stay left-aligned with icon + stacked parts; gap between different message turns increased (`space-y-4`→`space-y-5`) while keeping parts within one turn tight
+- **Fix (root cause, item 3):** `src/lib/editor/apply-edit.ts` — `insert_text` inserted a raw string via `insertContentAt`, which glues onto whatever's at that position with no paragraph boundary — that's why AI-inserted text looked structure-blind. Now always inserts a proper `paragraph` node, inheriting the document's real paragraph formatting; `src/app/api/chat/route.ts` — tool description updated so the model uses `replace_text` (not `insert_text`) for anything that isn't a whole new paragraph
+- **New:** `src/components/editor/extensions/flash-highlight.ts` — a TipTap extension that briefly highlights the range an AI tool just touched (CSS keyframe fade, ~1.8s), wired into all three edit tools in `apply-edit.ts`. Answers item 2's underlying want (some visible signal of what changed) without building a full diff/accept-reject review UI — see response for scoping on that
+- **Adjust:** `src/hooks/use-document-editor.ts` — registered `FlashHighlight` extension
+
+---
+
 ### 13:42
 > "lets QC. (1) Margin on paper masih acak2an bgt, default should be 1 inch from edge (vertically and horizontally), paper should be real paper size (A4, Letter, etc). (2) [Image #8] thought processs should not be directly visible, diminimze dulu aja by default dan user harus tau kalo ai lagi mikir, either tambah animasi laoading or something (saran: breathing animation di "Reindex Agnet is thinking". (3) Add more icons to each components, skrg msh plain bgt apalagi di AI sidebar. (4) Noticable bug: prompt pertama berhasil dan menulis ke kertas, prompt kedua jg masih bs dijawab, ketika masuk ke prompt ketiga udh ngaco dan ga ada output sama sekali."
 

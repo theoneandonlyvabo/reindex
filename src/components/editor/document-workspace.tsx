@@ -36,14 +36,6 @@ export function DocumentWorkspace({ doc }: { doc: Doc<"documents"> }) {
         <aside className="no-print hidden w-full flex-col overflow-hidden border-l lg:flex lg:basis-[22%]">
           <div className="flex h-12 items-center justify-between border-b px-4 py-2">
             <div className="flex items-center gap-2">
-              <Image
-                src="/reindex-logo.png"
-                alt=""
-                width={16}
-                height={16}
-                className="size-4"
-                unoptimized
-              />
               <span className="text-sm font-medium">Reindex Agent</span>
             </div>
             <Button

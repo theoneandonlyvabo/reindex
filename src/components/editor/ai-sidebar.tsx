@@ -13,6 +13,7 @@ import {
   ChevronRight,
   FilePlus2,
   Frown,
+  Plus,
   Replace,
   RotateCcw,
   Search,
@@ -29,8 +30,33 @@ import {
   type EditResult,
 } from "@/lib/editor/apply-edit";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ChatMarkdown } from "./chat-markdown";
+
+function GeminiIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true">
+      <defs>
+        <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#4C8DF6" />
+          <stop offset="50%" stopColor="#9168C0" />
+          <stop offset="100%" stopColor="#F45C7F" />
+        </linearGradient>
+      </defs>
+      <path
+        fill="url(#gemini-gradient)"
+        d="M8 0c0 4.42-3.58 8-8 8 4.42 0 8 3.58 8 8 0-4.42 3.58-8 8-8-4.42 0-8-3.58-8-8Z"
+      />
+    </svg>
+  );
+}
 
 type SearchWebOutput = {
   answer: string;
@@ -64,6 +90,10 @@ export function AiSidebar({
   // must stay pure). Keyed by send order since the SDK assigns message ids
   // asynchronously, after this handler returns.
   const [userTimestamps, setUserTimestamps] = useState<number[]>([]);
+  // Mode switcher and attach-file button are UI-only for now — no wiring,
+  // per explicit request ("DO BASICALLY NOTHING (for now)").
+  const [mode, setMode] = useState("writing");
+  const [attachNotice, setAttachNotice] = useState(false);
 
   // `body` as a FUNCTION (not a static object) is required: useChat's
   // automatic resubmit after a client-executed tool result does not carry
@@ -150,13 +180,29 @@ export function AiSidebar({
       },
     });
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function submitMessage() {
     const text = input.trim();
-    if (!text) return;
+    if (!text || isBusy) return;
     setUserTimestamps((prev) => [...prev, Date.now()]);
     void sendMessage({ text });
     setInput("");
+  }
+
+  function handleFormSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    submitMessage();
+  }
+
+  function handleTextareaKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submitMessage();
+    }
+  }
+
+  function handleAttachClick() {
+    setAttachNotice(true);
+    setTimeout(() => setAttachNotice(false), 2000);
   }
 
   const isBusy = status === "streaming" || status === "submitted";
@@ -355,19 +401,73 @@ export function AiSidebar({
       </div>
 
       <form
-        onSubmit={handleSubmit}
-        className="no-print flex items-center gap-2 border-t p-4"
+        onSubmit={handleFormSubmit}
+        className="no-print flex flex-col gap-1.5 border-t p-3"
       >
-        <Input
+        <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleTextareaKeyDown}
           placeholder="Ask or request an edit..."
           disabled={isBusy}
+          rows={1}
+          className="max-h-40 min-h-9 resize-none border-none px-1 py-1 shadow-none focus-visible:ring-0"
         />
-        <Button type="submit" size="icon-sm" disabled={!input.trim() || isBusy}>
-          <Send />
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <div className="relative">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleAttachClick}
+            >
+              <Plus />
+            </Button>
+            {attachNotice ? (
+              <span className="absolute bottom-full left-0 mb-1 rounded-md border bg-popover px-2 py-1 text-xs whitespace-nowrap shadow-md">
+                Coming soon
+              </span>
+            ) : null}
+          </div>
+
+          <Select value={mode} onValueChange={setMode}>
+            <SelectTrigger
+              size="sm"
+              className="h-7 w-auto gap-1 border-none bg-transparent px-2 text-xs shadow-none hover:bg-accent"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="writing">Writing</SelectItem>
+              <SelectItem value="planning">Planning</SelectItem>
+              <SelectItem value="research">Research</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex-1" />
+
+          <Button type="submit" size="icon-sm" disabled={!input.trim() || isBusy}>
+            <Send />
+          </Button>
+        </div>
       </form>
+
+      <div className="no-print flex items-center justify-center border-t px-4 py-2">
+        <Select defaultValue="gemini">
+          <SelectTrigger size="sm" className="w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="gemini">
+              <GeminiIcon className="size-3.5" />
+              Gemini 3.5 Flash
+            </SelectItem>
+            <SelectItem value="more" disabled>
+              More models coming soon
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }

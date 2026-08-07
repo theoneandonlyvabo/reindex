@@ -2,7 +2,28 @@
 
 Auto-enforced by `.claude/hooks/changelog-check.sh` (Stop hook) — see CLAUDE.md > Changelog Policy. Grouped by day, newest day and newest entry on top.
 
+## 2026-08-08
+
+### 00:05
+> "[Image #10] muted background dibelakang paper kalo scroll nya agresif (sampe overflow) itu nunjukin perbedaan warna background muted sm default, bikin background muted yg dibelakang paper lebih gede aja size nya kerender" + "[Image #9] komposisi typebar seharusnya gini, dengan isi yg gw mau: (1) typing area (ofcourse) but skrg kalo text kepanjangan dia overflow, bikin supaya break line kalo udh lewatin container kanan). (2) Atach file menu (tapi kalo diclick tulis aja 'Coming Soon'). (3) Mode Switcher (Writing, Planning, Research) (tapi bikin switcher ini DO BASICALLY NOTHING (for now)). (4) dan ofcourse enter button."
+
+- **Fix (root cause):** `document-editor.tsx` — on an aggressive scroll-bounce past `.doc-canvas`'s edge, its own `bg-muted` can't cover the overscrolled gap, exposing the app's warm `--background` from the unstyled parent behind it. Added `bg-muted` to that parent wrapper too, so there's muted-colored area behind the canvas regardless of which element is actually bouncing — not a fix to the bounce itself (native OS/browser physics), but eliminates the color mismatch it was revealing
+- **New:** `Textarea` shadcn component (`src/components/ui/textarea.tsx`, `field-sizing: content` native auto-grow). Chat input in `ai-sidebar.tsx` switched from single-line `Input` (which just overflowed instead of wrapping) to this — text now breaks to a new line once it hits the container edge. `Enter` still sends (re-added via `onKeyDown`, since unlike `<input>`, a `<textarea>` doesn't submit its form on Enter by default); `Shift+Enter` inserts a literal newline
+- **New:** bottom control row in the chat input — "+" attach-file button (`handleAttachClick`, shows a transient "Coming soon" bubble for 2s, no real upload wiring) and a mode switcher (`Select`: Writing/Planning/Research, local state only, `onValueChange` doesn't do anything else — explicitly requested as a no-op placeholder for now)
+- Verified: `tsc`, `eslint`, `next build` all clean
+
+---
+
 ## 2026-08-07
+
+### 01:20
+> "[Image #8] di pling bawah (under typebar) tambahin switcher model LLM yang lagi dipake untuk general purpose (currently kan gemini ya) dengan opsi lainnya for now gausah ada dulu (jadi isi switchernya cm Gemini dan 'More models coming soon'), also tambahin icon LLM mentioned." + "tulisan 'Model' nya drop aja gausah dirender, dan swicher nya align center, also tulisin model gemini yg dipake tuh apa (misal Gemini 3.6 Flash)"
+
+- **New:** `src/components/editor/ai-sidebar.tsx` — model switcher footer row below the chat input, `Select` with two entries: "Gemini 3.5 Flash" (real model name, read from `app/api/chat/route.ts`'s actual `google("gemini-3.5-flash")` call rather than the user's illustrative "3.6" example) and a disabled "More models coming soon" placeholder — display-only, doesn't actually switch backends since there's only one wired up. Row is centered, no label text (dropped per follow-up)
+- **New:** inline `GeminiIcon` SVG in the same file (approximate 4-point sparkle mark, gradient blue→purple→pink) — no new icon dependency, same pattern as the inline Google "G" mark on the sign-in page (`MASTER_PROMPT.md` explicitly rules out adding `react-icons` alongside `lucide-react`)
+- Verified: `tsc`, `eslint`, `next build` all clean
+
+---
 
 ### 01:05
 > "[Image #6] Outline menu jangan setara sama semua element, tuck dia dibawah toolbar utama (vertically under kyk gambar ini. nih spesifik disininya [Image #7] kalo lu liat di sejajar paper kan bukan toolbar utama" (Google Docs reference: outline panel sits below the toolbar, alongside the page only) + "reduce width agent sidebar, increase outline sidebar menu SEDIKIT"

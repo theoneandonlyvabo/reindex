@@ -54,8 +54,13 @@ export function DocumentEditor({
       />
       {/* Outline sits BELOW the title bar + toolbar (which span the full
        * editor column width), alongside only the paper canvas — not a
-       * full-height sibling column like the AI sidebar. */}
-      <div className="relative flex min-h-0 flex-1">
+       * full-height sibling column like the AI sidebar.
+       * bg-muted on this wrapper too (not just .doc-canvas below): on an
+       * aggressive scroll-bounce past the canvas's edge, its own
+       * background can't cover the overscrolled gap, and the app's warm
+       * --background peeks through from behind. Muted here means there's
+       * muted-colored area behind it either way. */}
+      <div className="relative flex min-h-0 flex-1 bg-muted">
         {outlineOpen ? (
           <DocumentOutline
             editor={editor}
